@@ -1,0 +1,13 @@
+/vendor
+/.idea
+/public/uploads/property_images
+/public/uploads/property_plan_images
+/public/uploads/advertisements
+/public/uploads/residences
+/nbproject
+/conf
+private.xml
+Homestead.json
+Homestead.yaml
+.env
+
