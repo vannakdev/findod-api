@@ -4,13 +4,13 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Translate extends Model {
-
+class Translate extends Model
+{
 //    protected $appends = [];
 //    protected $with = ['translation'];
 
 //    public $translatefill;
-     protected $table = 'properties_translations';
+    protected $table = 'properties_translations';
     /**
      * The attributes that should be casted to native types.
      *
@@ -25,9 +25,9 @@ class Translate extends Model {
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function translatable() {
+    public function translatable()
+    {
 //        return $this->morphTo();
         return $this->hasMany('App\PropertiesTranslation')->where('locale', '=', app('translator')->getLocale());
     }
-
 }

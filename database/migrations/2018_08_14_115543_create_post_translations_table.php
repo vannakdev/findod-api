@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreatePostTranslationsTable extends Migration
 {
@@ -13,8 +13,8 @@ class CreatePostTranslationsTable extends Migration
      */
     public function up()
     {
-        Schema::table('posts',  function (Blueprint $table) {
-            $table->dropColumn(['title','content']);
+        Schema::table('posts', function (Blueprint $table) {
+            $table->dropColumn(['title', 'content']);
         });
 
         Schema::create('post_translations', function (Blueprint $table) {
@@ -22,11 +22,11 @@ class CreatePostTranslationsTable extends Migration
             $table->integer('post_id')->unsigned();
             $table->string('locale')->index();
             $table->string('title', 500)->nullable(false);
-            $table->longText('content')->default("");
-            $table->string('meta_keyword',70)->default("")->nullable(false);
-            $table->string('meta_description',500)->default("")->nullable(false);
+            $table->longText('content')->default('');
+            $table->string('meta_keyword', 70)->default('')->nullable(false);
+            $table->string('meta_description', 500)->default('')->nullable(false);
 
-            $table->unique(['post_id','locale']);
+            $table->unique(['post_id', 'locale']);
             $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
         });
     }
@@ -44,9 +44,9 @@ class CreatePostTranslationsTable extends Migration
         });
         Schema::dropIfExists('post_translations');
 
-        Schema::table('posts',  function (Blueprint $table) {
+        Schema::table('posts', function (Blueprint $table) {
             $table->string('title', 500)->nullable(false)->after('user_id');
-            $table->longText('content')->default("")->after("slug");
+            $table->longText('content')->default('')->after('slug');
         });
     }
 }

@@ -11,7 +11,6 @@
   |
  */
 
- 
 /////===================Post with autho==================
 $router->group(['prefix' => 'api', 'middleware' => ['access', 'auth', 'localization']], function () use ($router) {
     // User request control
@@ -28,7 +27,6 @@ $router->group(['prefix' => 'api', 'middleware' => ['access', 'auth', 'localizat
     //Remove favorite property
     $router->delete('favorite/{id}', ['uses' => 'PropertyController@removeFavorite']);
 
-
 //    // Property request control
 //    //============Create a property==============================//
     $router->post('property', ['uses' => 'PropertyController@hosting']);
@@ -40,7 +38,6 @@ $router->group(['prefix' => 'api', 'middleware' => ['access', 'auth', 'localizat
 
     // ============Update a property==============================//
     $router->put('/property/update/byWeb/{id}', ['uses' => 'PropertyController@updateByWeb']);
-
 
     //============Update price for a property==============================//
     $router->put('property/update/price/{id}', ['uses' => 'PropertyController@updatePrice']);
@@ -66,10 +63,8 @@ $router->group(['prefix' => 'api', 'middleware' => ['access', 'auth', 'localizat
     //============Delete property video==============================//
     $router->delete('property/update/video/delete/{id}', ['uses' => 'PropertyController@deleteVideo']);
 
-
     //============Update property contact==============================//
     $router->get('property/update/getUpdateData', ['uses' => 'PropertyController@getUpdateData']);
-
 
     //============Update property contact==============================//
     $router->get('property/hosting/getHostingData', ['uses' => 'PropertyController@getHostingData']);
@@ -80,13 +75,11 @@ $router->group(['prefix' => 'api', 'middleware' => ['access', 'auth', 'localizat
     //============Search property project name==============================//
     $router->post('property/projectName/search', ['uses' => 'PropertyProjectNameController@searchProjectName']);
 
-
     //============SoftDelete a property==============================//
     $router->delete('property/{id}', ['uses' => 'PropertyController@softDelete']);
 
     //============Get one property==============================//
     $router->get('property/{id}', ['uses' => 'PropertyController@propertyDetail']);
-
 
     // Get list of property favorite by login userr==========
     $router->get('/property/byfavorite/user', ['uses' => 'PropertyController@propertyByFavorite']);
@@ -94,12 +87,11 @@ $router->group(['prefix' => 'api', 'middleware' => ['access', 'auth', 'localizat
     // Get list of property favorite by login userr==========
     $router->get('/property/byfavorite/user/web', ['uses' => 'PropertyController@propertyByFavoriteWeb']);
 
-
     // Get list of property posted login userr==========
     $router->get('/property/byposted/user', ['uses' => 'PropertyController@postedPropertyByUser']);
 
     // Get list of property posted login userr by web==========
-	$router->get('/property/byposted/user/web', ['uses' => 'PropertyController@postedPropertyByUserWeb']);
+    $router->get('/property/byposted/user/web', ['uses' => 'PropertyController@postedPropertyByUserWeb']);
 
     $router->put('logout', ['uses' => 'UserController@logout']);
 
@@ -111,11 +103,11 @@ $router->group(['prefix' => 'api', 'middleware' => ['access', 'auth', 'localizat
 
     //============Search a property history==============================//
 //    $router->post('/filter/setfilter', 'PropertyController@setFilterHistroy');
-//    
+//
 
     //============Search a property==============================//
     $router->post('filter', 'PropertyController@filter');
-    
+
     //============Search a property for web==============================//
     $router->post('filterByWeb', 'PropertyController@filterByWeb');
 
@@ -126,10 +118,8 @@ $router->group(['prefix' => 'api', 'middleware' => ['access', 'auth', 'localizat
     //Get rating exist
     $router->get('/rating/check/{id}', ['uses' => 'RatingController@checkRating']);
 
-
     //Post request viewing property
     $router->post('/property/request-viewing/', ['uses' => 'RequestViewingController@create']);
-
 
     //===============Property report by user====================
     //Post report
@@ -140,7 +130,6 @@ $router->group(['prefix' => 'api', 'middleware' => ['access', 'auth', 'localizat
 
     //Get report type
     $router->get('/property/reportType/list', ['uses' => 'ReportTypeController@showAll']);
-
 
 //    //============Get all properties==============================//
 //    $router->get('property', ['uses' => 'PropertyController@showAllProperty']);
@@ -166,17 +155,17 @@ $router->group(['prefix' => 'api', 'middleware' => ['access', 'auth', 'localizat
     //Author: HIA YONGKUY
     //Chat Route
     $router->get('chat/property/{property_id}', ['uses' => 'ChatController@init']);
-    $router->get('chat/channel/list', ['uses' => "ChatController@list"]);
-    $router->get('chat/channel/{id}', ['uses' => "ChatController@get"]);
+    $router->get('chat/channel/list', ['uses' => 'ChatController@list']);
+    $router->get('chat/channel/{id}', ['uses' => 'ChatController@get']);
     $router->post('chat/message', ['uses' => 'ChatController@saveMessageFromRequest']);
-    $router->get('chat/unread/count', ['uses' => "ChatController@UnreadCount"]);
-    $router->delete('chat/channel/{id}', ['uses' => "ChatController@deleteFromRequest"]);
+    $router->get('chat/unread/count', ['uses' => 'ChatController@UnreadCount']);
+    $router->delete('chat/channel/{id}', ['uses' => 'ChatController@deleteFromRequest']);
     //End - Chat Route
     //Gallery Upload
-    $router->post('gallery/create', ['uses' => "GalleryController@createFromRequest"]);
-    $router->get('gallery/get', ['uses' => "GalleryController@get"]);
-    $router->delete('gallery/image/{id}', ['uses' => "GalleryController@deleteItem"]);
-    $router->put('gallery/image/{id}', ['uses' => "GalleryController@updateItemOrder"]);
+    $router->post('gallery/create', ['uses' => 'GalleryController@createFromRequest']);
+    $router->get('gallery/get', ['uses' => 'GalleryController@get']);
+    $router->delete('gallery/image/{id}', ['uses' => 'GalleryController@deleteItem']);
+    $router->put('gallery/image/{id}', ['uses' => 'GalleryController@updateItemOrder']);
     //End - Gallery Upload
     //Application Setting
     $router->put('application/setting/{key}', ['uses' => 'SettingController@update']);
@@ -187,7 +176,9 @@ $router->group(['prefix' => 'api', 'middleware' => ['access', 'auth', 'localizat
 $router->group(['prefix' => 'api', 'middleware' => ['access', 'localization']], function () use ($router) {
     //$router->group(['prefix' => 'api', 'middleware' => ['access']], function () use ($router) {
     //============Get all properties==============================//
-    $router->get('/', function () { return "Hello FindOD"; });
+    $router->get('/', function () {
+        return 'Hello FindOD';
+    });
     $router->get('property', ['uses' => 'PropertyController@showAllProperty']);
 
 //    ========================================================
@@ -197,10 +188,9 @@ $router->group(['prefix' => 'api', 'middleware' => ['access', 'localization']], 
     $router->get('users/{id}', ['uses' => 'UserController@showOneUser']);
     $router->post('users', ['uses' => 'UserController@userRegister']);
     $router->post('login', ['uses' => 'AuthController@authenticate']);
-    $router->post('socialLogin', ["uses" => "UserController@socialLogin"]);
+    $router->post('socialLogin', ['uses' => 'UserController@socialLogin']);
     // Agent register==========
     $router->post('agent', ['uses' => 'UserController@agentRegister']);
-
 
     //==================Property Modauls===========================//
 //
@@ -209,8 +199,6 @@ $router->group(['prefix' => 'api', 'middleware' => ['access', 'localization']], 
 
     //============Map cluster: all near by location properties will given==============================//
     $router->post('mapcluster', ['uses' => 'PropertyController@mapCluster']);
-
-
 
     $router->post('db_update', 'DatabaseController@updateDatabase');
     $router->post('db_backup', 'DatabaseController@backup');
@@ -226,16 +214,16 @@ $router->group(['prefix' => 'api', 'middleware' => ['access', 'localization']], 
     $router->get('/residence', 'PropertyController@getResidence');
     //============Get list of residence group by residence type==============================//
     $router->get('/residence/type', 'PropertyController@getResidenceByType');
-    
-    //============Get residence feature =====================================================//		
+
+    //============Get residence feature =====================================================//
     $router->get('residence/feature/{id}', 'PropertyController@getResidenceByFeature');
 
-    $router->post('/user/password-reset-request', ["uses" => "UserController@sendResetEmail"]);
-    $router->post('/user/reset-password', ["uses" => "UserController@resetPassword"]);
+    $router->post('/user/password-reset-request', ['uses' => 'UserController@sendResetEmail']);
+    $router->post('/user/reset-password', ['uses' => 'UserController@resetPassword']);
 
-    $router->post('/user/password-reset-link-request', ["uses" => "UserController@sendLinkResetPassword"]);
+    $router->post('/user/password-reset-link-request', ['uses' => 'UserController@sendLinkResetPassword']);
 //    $router->get('/user/password-reset-link-auth/{link}', ["uses" => "UserController@resetLinkAuth"]);
-    $router->post('/user/password-reset-link', ["uses" => "UserController@resetPassword"]);
+    $router->post('/user/password-reset-link', ['uses' => 'UserController@resetPassword']);
 
     //============Backend upload a property photos==============================//
     $router->post('/property/upload/photos', ['uses' => 'PropertyController@backendUploadPhotos']);
@@ -257,16 +245,12 @@ $router->group(['prefix' => 'api', 'middleware' => ['access', 'localization']], 
     //============Backend upload advertisement=============================//
     $router->post('/property/upload/advertisement', ['uses' => 'PropertyController@backendUploadAdvertisement']);
 
-
     //============Advertisement moduel=============================//
     $router->get('advertisement', ['uses' => 'AdvertisementController@index']);
 
     $router->get('advertisement/list', ['uses' => 'AdvertisementController@showAll']);
     $router->get('advertisement/weblist', ['uses' => 'AdvertisementController@showAllWeb']);
     $router->get('advertisement/view/{id}', ['uses' => 'AdvertisementController@show']);
-
-
-
 
     //=========================Onesignal new player id=================================
     $router->post('/users/create/player', ['uses' => 'OneSignalController@createPlayer']);
@@ -284,7 +268,6 @@ $router->group(['prefix' => 'api', 'middleware' => ['access', 'localization']], 
     $router->post('/notify/passwordChangeConfirm', ['uses' => 'NotificationController@notifyPasswordChangeConfirm']);
     $router->post('/notify/DeactivateAccount', ['uses' => 'NotificationController@notifyDeactivateAccount']);
 
-
     //================Test notification==================================
     $router->post('/notify/nearbyPost', ['uses' => 'NotificationController@nearbyPost']);
     //=========================Test Cronjob =================================
@@ -292,22 +275,22 @@ $router->group(['prefix' => 'api', 'middleware' => ['access', 'localization']], 
     //=========================Test Cronjob =================================
     $router->post('FakProperties', ['uses' => 'PropertyController@insertFakProperties']);
     //==============Reset password link validation ===================
-    $router->get('/user/password-reset-link-auth/{link}', ["uses" => "UserController@resetLinkAuth"]);
+    $router->get('/user/password-reset-link-auth/{link}', ['uses' => 'UserController@resetLinkAuth']);
     ////////===================Project Administrator================================
     $router->post('/projetAdministrator/userResetPasswords', ['uses' => 'DatabaseController@userResetPassword']);
     //Author : HIA YONGKUY
-    $router->get('gallery/get', ['uses' => "GalleryController@get"]);
-    $router->get('posts/{param}', ['uses' => "PostController@show"]);
+    $router->get('gallery/get', ['uses' => 'GalleryController@get']);
+    $router->get('posts/{param}', ['uses' => 'PostController@show']);
     $router->get('application/setting', ['uses' => 'SettingController@getByKeys']);
     $router->get('application/setting/{key}', ['uses' => 'SettingController@get']);
     //END - Author : HIA YONGKUY
 
-    $router->post('google/get/json', ['uses' => "GoogleServiceController@submitRequest"]);
+    $router->post('google/get/json', ['uses' => 'GoogleServiceController@submitRequest']);
 
     //Author : PONRAJ
-	
-	$router->post('application/setting/videoImage',['uses' => 'SettingController@uploadvideoImage']);
-	
-	//END - Author : PONRAJ
+
+    $router->post('application/setting/videoImage', ['uses' => 'SettingController@uploadvideoImage']);
+
+    //END - Author : PONRAJ
     $router->get('setting/residence', ['uses' => 'SettingController@show']);
 });

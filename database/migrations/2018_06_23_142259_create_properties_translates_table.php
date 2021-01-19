@@ -1,13 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreatePropertiesTranslatesTable extends Migration {
-
+class CreatePropertiesTranslatesTable extends Migration
+{
     /**
-     * Schema table name to migrate
+     * Schema table name to migrate.
      * @var string
      */
     public $set_schema_table = 'properties_translations';
@@ -17,9 +17,11 @@ class CreatePropertiesTranslatesTable extends Migration {
      *
      * @return void
      */
-    public function up() {
-        if (Schema::hasTable($this->set_schema_table))
+    public function up()
+    {
+        if (Schema::hasTable($this->set_schema_table)) {
             return;
+        }
         Schema::create($this->set_schema_table, function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -29,7 +31,7 @@ class CreatePropertiesTranslatesTable extends Migration {
             $table->nullableTimestamps();
 
             $table->unique(['properties_id', 'locale']);
-            
+
             $table->foreign('properties_id')->references('id')->on('properties')->onDelete('cascade');
         });
     }
@@ -39,8 +41,8 @@ class CreatePropertiesTranslatesTable extends Migration {
      *
      * @return void
      */
-    public function down() {
+    public function down()
+    {
         Schema::dropIfExists($this->set_schema_table);
     }
-
 }

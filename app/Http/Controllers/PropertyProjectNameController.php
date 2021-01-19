@@ -1,38 +1,40 @@
 <?php
 
 /**
- * Global class for system notification
+ * Global class for system notification.
  *
  * @author OU Sophea : ODIC
  */
 
 namespace App\Http\Controllers;
 
-use Validator;
 use App\ProjectName;
 use App\Properties;
 use Illuminate\Http\Request;
+use Validator;
 
 /**
- * Description of newPHPClass
+ * Description of newPHPClass.
  *
  * @author OU Sophea : ODIC
  */
-class PropertyProjectNameController extends Controller {
-
-    public function __construct() {
-        
+class PropertyProjectNameController extends Controller
+{
+    public function __construct()
+    {
     }
 
-    static protected $number_per_page = 25;
+    protected static $number_per_page = 25;
 
-    public function showAll() {
+    public function showAll()
+    {
         $getProjectName = ProjectName::all();
 
-        return $this->getResponseData('1', "", $getProjectName);
+        return $this->getResponseData('1', '', $getProjectName);
     }
 
-    public function searchProjectName(Request $request) {
+    public function searchProjectName(Request $request)
+    {
         $rules = [
             'lat' => 'required|numeric',
             'lng' => 'required|numeric',
@@ -51,21 +53,21 @@ class PropertyProjectNameController extends Controller {
 
         $selectColumns = [
             'id',
-            'address'
+            'address',
         ];
-        $arraySelectColumn = implode(",", $selectColumns);
+        $arraySelectColumn = implode(',', $selectColumns);
 
-        $getPropertyByDistance = ProjectName::getProjectByDistance($lat, $lng, $distance, $residence_id,$arraySelectColumn);
+        $getPropertyByDistance = ProjectName::getProjectByDistance($lat, $lng, $distance, $residence_id, $arraySelectColumn);
 
         $nearByList = [];
-        if (!empty($getPropertyByDistance)) {
+        if (! empty($getPropertyByDistance)) {
             foreach ($getPropertyByDistance as $project):
                 array_push($nearByList, $project->id);
             endforeach;
         }
         $projectList = ProjectName::whereIn('id', $nearByList)
                 ->paginate(self::$number_per_page)->toArray();
-        return $this->getResponseData('1', "", $projectList['data']);
-    }
 
+        return $this->getResponseData('1', '', $projectList['data']);
+    }
 }

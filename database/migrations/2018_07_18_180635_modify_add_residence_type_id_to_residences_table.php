@@ -36,6 +36,5 @@ class ModifyAddResidenceTypeIdToResidencesTable extends Migration
         // });
 
         // Schema::enableForeignKeyConstraints();
-
     }
 }

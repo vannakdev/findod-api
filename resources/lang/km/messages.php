@@ -8,7 +8,7 @@ return [
     'user_deactivated' => 'គណនីអ្នកប្រើត្រូវបានផ្អាកសកម្មភាព',
 
     'requiredPlayerId' => 'The player id header is required.',
-    
+
     'userAuthenticated' => 'គណនីអ្នកប្រើត្រូវបានផ្ទៀងផ្ទាត់ភាពជោគជ័យ',
     'fileUploadFailed' => 'ឯកសារកំពុងបានដាក់បញ្ចូលមានការបរាជ័យ',
     'resetPasswordByWeb' => 'លេខសម្ងាត់ត្រូវបានបង្កើតសារឡើងវិញ',
@@ -19,7 +19,7 @@ return [
     'userNotFound' => 'មិនអាចស្វែងរកគណនីអ្នកប្រើប្រាស់',
     'logoutFailed' => 'ការចាកចេញរបស់អ្នកប្រើប្រាស់បរាជ័យ,សូមព្យាយាមម្តងទៀត',
     'logoutSuccess' => 'ការចាកចេញរបស់អ្នកប្រើប្រាស់បានជោគជ័យ',
-    
+
     'fileLenght' => 'ការផ្ទៀងផ្ទាត់ត្រូវបានបរាជ័យ',
     'data_validation' => 'សុពលភាពទិន្នន័យបានបរាជ័យ។',
 
@@ -29,13 +29,11 @@ return [
         //=========27/07/2018====================
     'deleteVideo'=>'Your video delete failed.',
     'videoNotFound'=>'Your video not found.',
-    
-    
-    
+
     'conjunction_in' => 'ក្នុង',
     'conjunction_for' => 'សំរាប់',
 
-    //================== Colcation selection=====================    
+    //================== Colcation selection=====================
     'Banteay Meanchey' => 'ខេត្តបន្ទាយមានជ័យ',
     'Battambang' => 'ខេត្តបាត់ដំបង',
     'Kampong Cham' => 'ខេត្តកំពង់ចាម',
@@ -60,6 +58,5 @@ return [
     'Pailin' => 'ខេត្តប៉ៃលិន',
     'Phnom Penh' => 'រាជធានីភ្នំពេញ',
     'Preah Sihanouk' => 'ក្រុងព្រះសីហនុ',
-    'Tboung Khmum' => 'ខេត្តត្បូងឃ្មុំ'
+    'Tboung Khmum' => 'ខេត្តត្បូងឃ្មុំ',
 ];
-

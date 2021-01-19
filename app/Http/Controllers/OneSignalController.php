@@ -1,58 +1,58 @@
 <?php
 
 /**
- * Global class for system notification
+ * Global class for system notification.
  *
  * @author OU Sophea : ODIC
  */
 
 namespace App\Http\Controllers;
 
-use \Illuminate\Http\Request;
 use App\Http\Controllers\ResponderController;
+use Illuminate\Http\Request;
 use Validator;
 
-class OneSignalController extends Controller {
+class OneSignalController extends Controller
+{
 //    public function send($data,$content,$playerId) {
-//        
+//
 //        return self::sendMessage($data,$content, [$playerId]);
-//        
-////        return self::sendMessage(['foo' => "bar"], "Test Sending OneSignal Notification", ['ded6cf2c-dfed-4ad4-a7a4-50d38a8bd258']);
+//
+    ////        return self::sendMessage(['foo' => "bar"], "Test Sending OneSignal Notification", ['ded6cf2c-dfed-4ad4-a7a4-50d38a8bd258']);
 //    }
 
     /**
-     * Onesignal push notification send to Specific Devices
+     * Onesignal push notification send to Specific Devices.
      * @param array  [playerId, title, massage ]
-     * @param array $play_ids Identify 
+     * @param array $play_ids Identify
      * @param array $content the title of message and the description of notification
      * @return A property all information
      */
 //    public function sendMessage(Array $additionalData, Array $play_ids, Array $content) {
-    public function sendMessage(Array $request) {
-
-
-        $setFields = array(
+    public function sendMessage(array $request)
+    {
+        $setFields = [
             'app_id' => env('ONESIGNAL_APP_ID'),
             'include_player_ids' => $request['playerId'],
-            'headings' => ["title" => $request['title']],
-            'contents' => ["en" => $request['message']],
-            'data' => array(
-                "action" => $request['action'],
-                "message" => $request['message'],
-            ),
-        );
+            'headings' => ['title' => $request['title']],
+            'contents' => ['en' => $request['message']],
+            'data' => [
+                'action' => $request['action'],
+                'message' => $request['message'],
+            ],
+        ];
 
         $fields = json_encode($setFields);
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://onesignal.com/api/v1/notifications");
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json; charset=utf-8',
-            'Authorization: Basic ODFiNDhjZjktMjZiNy00NjQ1LWJhMzItY2VjMWRjOWVmOTM4'));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($ch, CURLOPT_HEADER, FALSE);
-        curl_setopt($ch, CURLOPT_POST, TRUE);
+        curl_setopt($ch, CURLOPT_URL, 'https://onesignal.com/api/v1/notifications');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json; charset=utf-8',
+            'Authorization: Basic ODFiNDhjZjktMjZiNy00NjQ1LWJhMzItY2VjMWRjOWVmOTM4', ]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
         $response = curl_exec($ch);
         curl_close($ch);
@@ -61,36 +61,36 @@ class OneSignalController extends Controller {
     }
 
     /**
-     * Onesignal push notification send to Specific Devices
-     * @param Array Array three index [playerId, title, massage ]
-     * @return Array A notification id
+     * Onesignal push notification send to Specific Devices.
+     * @param array Array three index [playerId, title, massage ]
+     * @return array A notification id
      * @reference https://documentation.onesignal.com/reference#section-specific-devices-usage
      */
-    static function notifyPush(Array $request) {
-
-        $setFields = array(
+    public static function notifyPush(array $request)
+    {
+        $setFields = [
             'app_id' => env('ONESIGNAL_APP_ID'),
             'include_player_ids' => $request['playerId'],
-            'headings' => ["title" => $request['title']],
-            'contents' => ["en" => $request['message']],
-            'data' => array(
-                "action" => $request['action'],
-                "message" => $request['data'],
-            ),
-            
-        );
+            'headings' => ['title' => $request['title']],
+            'contents' => ['en' => $request['message']],
+            'data' => [
+                'action' => $request['action'],
+                'message' => $request['data'],
+            ],
+
+        ];
 
         $fields = json_encode($setFields);
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://onesignal.com/api/v1/notifications");
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json; charset=utf-8',
-            'Authorization: Basic ODFiNDhjZjktMjZiNy00NjQ1LWJhMzItY2VjMWRjOWVmOTM4'));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($ch, CURLOPT_HEADER, FALSE);
-        curl_setopt($ch, CURLOPT_POST, TRUE);
+        curl_setopt($ch, CURLOPT_URL, 'https://onesignal.com/api/v1/notifications');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json; charset=utf-8',
+            'Authorization: Basic ODFiNDhjZjktMjZiNy00NjQ1LWJhMzItY2VjMWRjOWVmOTM4', ]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
         $response = curl_exec($ch);
         curl_close($ch);
@@ -98,75 +98,79 @@ class OneSignalController extends Controller {
         return json_decode($response);
     }
 
-    public function notificationsByUserId($id) {
+    public function notificationsByUserId($id)
+    {
         $app_id = env('ONESIGNAL_APP_ID');
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://onesignal.com/api/v1/notifications/" . $id . "?app_id=" . $app_id);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json',
-            'Authorization: Basic ODFiNDhjZjktMjZiNy00NjQ1LWJhMzItY2VjMWRjOWVmOTM4'));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($ch, CURLOPT_HEADER, FALSE);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_URL, 'https://onesignal.com/api/v1/notifications/'.$id.'?app_id='.$app_id);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json',
+            'Authorization: Basic ODFiNDhjZjktMjZiNy00NjQ1LWJhMzItY2VjMWRjOWVmOTM4', ]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
         $response = curl_exec($ch);
         curl_close($ch);
-        $return["allresponses"] = $response;
-        return json_decode($return["allresponses"]);
+        $return['allresponses'] = $response;
 
+        return json_decode($return['allresponses']);
     }
 
-    public function createPlayer(Request $request) {
-        $device_os = "9.1.3";
-        $timezone = "-28800";
+    public function createPlayer(Request $request)
+    {
+        $device_os = '9.1.3';
+        $timezone = '-28800';
         $language = 'en';
 
         $validator = Validator::make($request->all(), ['device_type' => 'required|numeric|exists:device_types,index_number']);
 
         if ($validator->fails()): // check user input
-            return $this->getResponseData("0", $validator->errors()->first(), '');
+            return $this->getResponseData('0', $validator->errors()->first(), '');
         endif;
-        $fields = array(
+        $fields = [
             'app_id' => env('ONESIGNAL_APP_ID'),
             'language' => $language,
             'timezone' => $timezone,
             'device_os' => $device_os,
-            'device_type' => $request->input('device_type')
-        );
+            'device_type' => $request->input('device_type'),
+        ];
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://onesignal.com/api/v1/players");
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($ch, CURLOPT_HEADER, FALSE);
-        curl_setopt($ch, CURLOPT_POST, TRUE);
+        curl_setopt($ch, CURLOPT_URL, 'https://onesignal.com/api/v1/players');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
         $response = curl_exec($ch);
         curl_close($ch);
 
         $return = json_decode($response);
-        if (!isset($return->success)) {
-            return $this->getResponseData("0", "Can not create player ID.", $return->errors);
+        if (! isset($return->success)) {
+            return $this->getResponseData('0', 'Can not create player ID.', $return->errors);
         }
-        return $this->getResponseData("1", "Player ID create successfully.", ['id' => $return->id]);
+
+        return $this->getResponseData('1', 'Player ID create successfully.', ['id' => $return->id]);
     }
 
-    public function ViewNotification() {
+    public function ViewNotification()
+    {
         $app_id = env('ONESIGNAL_APP_ID');
 
         $curl = curl_init();
-        curl_setopt_array($curl, array(
+        curl_setopt_array($curl, [
             CURLOPT_URL => "https://onesignal.com/api/v1/notifications?app_id=$app_id&offset=2",
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => "",
+            CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
             CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "GET",
-            CURLOPT_HTTPHEADER => array(
-                "authorization: Basic ODFiNDhjZjktMjZiNy00NjQ1LWJhMzItY2VjMWRjOWVmOTM4",
-            ),
-        ));
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => [
+                'authorization: Basic ODFiNDhjZjktMjZiNy00NjQ1LWJhMzItY2VjMWRjOWVmOTM4',
+            ],
+        ]);
 
         $response = curl_exec($curl);
         $err = curl_error($curl);
@@ -185,5 +189,4 @@ class OneSignalController extends Controller {
 
         dd($notificationList);
     }
-
 }

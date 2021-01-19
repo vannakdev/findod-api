@@ -5,8 +5,8 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class Ratings extends Model {
-
+class Ratings extends Model
+{
     /**
      * The attributes that are mass assignable.
      *
@@ -19,7 +19,7 @@ class Ratings extends Model {
         'stars',
         'comments',
         'created_at',
-        'updated_at'
+        'updated_at',
     ];
 
     /**
@@ -29,16 +29,18 @@ class Ratings extends Model {
      */
     protected $hidden = [];
 
-    public function users() {
+    public function users()
+    {
         return $this->belongsTo('App\Users', 'user_id');
     }
 
-    public function properties() {
+    public function properties()
+    {
         return $this->belongsTo('App\Properties');
     }
 
-    public function getPropertyRate($propertyId) {
-
+    public function getPropertyRate($propertyId)
+    {
         $results = DB::table('ratings')
                         ->select(DB::raw('
             property_id, 
@@ -51,7 +53,7 @@ class Ratings extends Model {
     '))
                         ->where('property_id', $propertyId)
                         ->groupby('property_id')->first();
+
         return $results;
     }
-
 }

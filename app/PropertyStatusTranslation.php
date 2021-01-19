@@ -4,13 +4,10 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+class PropertyStatusTranslation extends Model
+{
+    protected $table = 'property_status_translations';
 
-
-class PropertyStatusTranslation extends Model {
-
-    
-     protected $table = 'property_status_translations';
-    
     /**
      * The attributes that are mass assignable.
      *
@@ -19,7 +16,7 @@ class PropertyStatusTranslation extends Model {
     protected $fillable = [
         'title',
         'locale',
-        'property_status_id'
+        'property_status_id',
     ];
 
     /**
@@ -27,9 +24,10 @@ class PropertyStatusTranslation extends Model {
      *
      * @var array
      */
-    protected $hidden = ['id','locale', 'created_at', 'updated_at','property_status_id'];
+    protected $hidden = ['id', 'locale', 'created_at', 'updated_at', 'property_status_id'];
 
-    public function PropertyStatus() {
+    public function PropertyStatus()
+    {
         return $this->belongsTo('App\PropertyStatus', 'property_status_id');
     }
 }

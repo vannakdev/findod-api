@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class ModifyForiegnKeyToAmenityPropertyTable extends Migration
 {
@@ -40,8 +40,6 @@ class ModifyForiegnKeyToAmenityPropertyTable extends Migration
         Schema::table('amenity_property', function (Blueprint $table) {
             $table->dropForeign(['property_id']);
             $table->dropForeign(['amenities_id']);
-
-
         });
     }
 }

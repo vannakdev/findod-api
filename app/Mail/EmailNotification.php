@@ -6,8 +6,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class EmailNotification extends Mailable {
-
+class EmailNotification extends Mailable
+{
     use Queueable,
         SerializesModels;
 
@@ -23,7 +23,7 @@ class EmailNotification extends Mailable {
      *
      * @var array
      */
-    public $param= array();
+    public $param = [];
 
     /**
      * The email address view to use email.
@@ -44,7 +44,8 @@ class EmailNotification extends Mailable {
      *
      * @return void
      */
-    public function __construct($subject, Array $param, $template) {
+    public function __construct($subject, array $param, $template)
+    {
         $this->subject = $subject;
         $this->param = $param;
         $this->template = $template;
@@ -55,12 +56,12 @@ class EmailNotification extends Mailable {
      *
      * @return $this
      */
-    public function build() {
-        $email = $this->from(env('MAIL_FROM_ADDRESS'), "Ocean Property")
+    public function build()
+    {
+        $email = $this->from(env('MAIL_FROM_ADDRESS'), 'Ocean Property')
                         ->subject($this->subject)
                         ->view('mail.template.'.$this->template)->with($this->param);
 
         return $email;
     }
-
 }

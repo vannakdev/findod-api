@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class AddForeignKeyToProjectNameTable extends Migration
 {
@@ -14,7 +14,6 @@ class AddForeignKeyToProjectNameTable extends Migration
     public function up()
     {
         Schema::table('project_name', function (Blueprint $table) {
-            
             $table->foreign('floor_category_id')
                     ->references('id')->on('floor_category')
                     ->onDelete('cascade')

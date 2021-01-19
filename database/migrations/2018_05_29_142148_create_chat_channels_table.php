@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateChatChannelsTable extends Migration
 {
@@ -19,7 +19,7 @@ class CreateChatChannelsTable extends Migration
             $table->integer('user_id')->unsigned();
             $table->integer('property_id')->unsigned();
             $table->enum('type', ['private', 'group', 'public'])->nullable(false)->default('private');
-            $table->softDeletes();          
+            $table->softDeletes();
             $table->timestamps();
 
             $table->foreign('user_id')
@@ -31,8 +31,6 @@ class CreateChatChannelsTable extends Migration
                   ->references('id')
                   ->on('properties')
                   ->onDelete('cascade');
-
-
         });
     }
 
@@ -43,12 +41,10 @@ class CreateChatChannelsTable extends Migration
      */
     public function down()
     {
-        Schema::table('chat_channels', function (Blueprint $table) {   
+        Schema::table('chat_channels', function (Blueprint $table) {
             // $table->dropForeign('chat_channels_user_id_foreign');
             // $table->dropForeign('chat_channels_property_id_foreign');
-        });         
+        });
         Schema::dropIfExists('chat_channels');
-
-       
     }
 }

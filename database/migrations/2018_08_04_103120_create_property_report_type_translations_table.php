@@ -26,7 +26,6 @@ class CreatePropertyReportTypeTranslationsTable extends Migration
             $table->foreign('report_type_id')->references('id')->on('type_of_property_reports')
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
-
         });
     }
 

@@ -2,11 +2,11 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Support\Translateable;
+use Illuminate\Database\Eloquent\Model;
 
-class Amenities extends Model {
-
+class Amenities extends Model
+{
     use Translateable;
 
     /**
@@ -17,11 +17,11 @@ class Amenities extends Model {
     protected $fillable = [
         'id',
         'title',
-        'icon'
+        'icon',
     ];
     public $timestamps = false;
     public $translationAble = ['title'];
-    public static $request = "";
+    public static $request = '';
 
     /**
      * The attributes excluded from the model's JSON form.
@@ -39,22 +39,25 @@ class Amenities extends Model {
     //=================Amenity traislation ============================
     protected $with = ['translation'];
 
-    public function translation() {
+    public function translation()
+    {
         return $this->hasMany('App\AmenitiesTranslation', 'amenity_id')->where('locale', '=', app('translator')->getLocale());
     }
 
-    public function getIconAttribute($value) {
-        if (isset($value) AND $value != '') {
-            return env('APP_URL') . 'uploads/amenities/' . $value;
+    public function getIconAttribute($value)
+    {
+        if (isset($value) and $value != '') {
+            return env('APP_URL').'uploads/amenities/'.$value;
         }
-        return [env('APP_URL') . 'uploads/amenities/samplePhoto.png'];
+
+        return [env('APP_URL').'uploads/amenities/samplePhoto.png'];
     }
 
     /**
      * The amenities that belong to the property.
      */
-    public function properties() {
+    public function properties()
+    {
         return $this->belongsToMany('App\Properties', 'amenity_property', 'amenities_id', 'property_id');
     }
-
 }

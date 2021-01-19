@@ -2,11 +2,11 @@
 
 namespace App\Observers;
 
-use App\Users;
 use App\Http\Controllers\NotificationController;
+use App\Users;
 
-class UsersObserver {
-
+class UsersObserver
+{
     public $module = 'RegisterUsers';
 
     /**
@@ -15,10 +15,11 @@ class UsersObserver {
      * @param  \App\Users $user
      * @return void
      */
-    public function created(Users $user) {
+    public function created(Users $user)
+    {
 
 //set an date and time to work with
-//==================Old function =========================
+        //==================Old function =========================
 //        $data = [
 //            'notification_manager_id' => 5,
 //            'process_at' => $process_at,
@@ -42,11 +43,11 @@ class UsersObserver {
 //        return true;
         //=============New version ==================
         $notify = new NotificationController();
-        
+
         $notify->sendWelcomeUser($user);
+
         return true;
     }
-    
 
     /**
      * Listen to the User deleting event.
@@ -54,8 +55,8 @@ class UsersObserver {
      * @param  \App\Rating  $rating
      * @return void
      */
-    public function deleting(Rating $rating) {
+    public function deleting(Rating $rating)
+    {
         //
     }
-
 }

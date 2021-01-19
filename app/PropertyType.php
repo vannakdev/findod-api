@@ -4,8 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PropertyType extends Model {
-
+class PropertyType extends Model
+{
     protected $table = 'property_type';
 
     /**
@@ -20,23 +20,26 @@ class PropertyType extends Model {
      *
      * @var array
      *
-     * @var type 
+     * @var type
      */
     protected $hidden = ['status', 'created_at', 'updated_at',
 //        'translation'
     ];
-    
 
     //=================Property type traislation ============================
     protected $with = ['translation'];
-    
-    public function getTitleAttribute($value) {
-         if ($this->translation->first()):
+
+    public function getTitleAttribute($value)
+    {
+        if ($this->translation->first()):
             return $this->translation->first()->title;
         endif;
+
         return $value;
     }
-    public function translation() {
+
+    public function translation()
+    {
         return $this->hasMany('App\PropertyTypeTranslation')->where('locale', '=', app('translator')->getLocale());
     }
 

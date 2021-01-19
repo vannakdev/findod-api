@@ -1,13 +1,15 @@
 {
     "name": "laravel/lumen",
     "description": "The Laravel Lumen Framework.",
-    "keywords": ["framework", "laravel", "lumen"],
+    "keywords": [
+        "framework",
+        "laravel",
+        "lumen"
+    ],
     "license": "MIT",
     "type": "project",
     "require": {
         "php": ">=5.6.4",
-        "laravel/lumen-framework": "5.5.*",
-        "vlucas/phpdotenv": "~2.2",
         "vluzrmos/tinker": "dev-master",
         "illuminate/mail": "^5.5",
         "guzzlehttp/guzzle": "^6.3",
@@ -16,7 +18,8 @@
         "ifsnop/mysqldump-php": "2.*",
         "doctrine/dbal": "^2.7",
         "spatie/laravel-cors": "^1.2",
-        "dimsav/laravel-translatable": "^8.1"
+        "dimsav/laravel-translatable": "^8.1",
+        "laravel/framework": "5.5.*"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

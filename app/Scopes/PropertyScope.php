@@ -2,12 +2,12 @@
 
 namespace App\Scopes;
 
-use Illuminate\Database\Eloquent\Scope;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Scope;
 
-class PropertyScope implements Scope {
-
+class PropertyScope implements Scope
+{
     /**
      * Apply the scope to a given Eloquent query builder.
      *
@@ -15,9 +15,9 @@ class PropertyScope implements Scope {
      * @param  \Illuminate\Database\Eloquent\Model  $model
      * @return void
      */
-    public function apply(Builder $builder, Model $model) {
+    public function apply(Builder $builder, Model $model)
+    {
         $builder->where('pro_active', 1);
         $builder->whereHas('users');
     }
-
 }

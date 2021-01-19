@@ -6,12 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class PasswordReset extends Model
 {
- 	
+    public $timestamps = false;
 
-	public $timestamps = false;
-
-	protected $dates = [
+    protected $dates = [
         'created_at',
         'lockout_at',
   ];
-}	
+}

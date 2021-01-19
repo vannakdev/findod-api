@@ -4,7 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class StatisticOfPriceRanges extends Model {
+class StatisticOfPriceRanges extends Model
+{
     /**
      * The attributes that are mass assignable.
      *
@@ -13,17 +14,13 @@ class StatisticOfPriceRanges extends Model {
     protected $fillable = [
         'min_price',
         'max_price',
-        'increasing_number'
+        'increasing_number',
     ];
-   
 
     /**
      * The attributes excluded from the model's JSON form.
      *
      * @var array
      */
-    protected $hidden = ['created_at','updated_at'];
-
-
-
+    protected $hidden = ['created_at', 'updated_at'];
 }

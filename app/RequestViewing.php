@@ -1,10 +1,11 @@
 <?php
 
 namespace App;
+
 use Illuminate\Database\Eloquent\Model;
 
-class RequestViewing extends Model {
-
+class RequestViewing extends Model
+{
     /**
      * The attributes that are mass assignable.
      *
@@ -14,7 +15,7 @@ class RequestViewing extends Model {
     protected $fillable = [
         'users_id',
         'property_id',
-        'description'
+        'description',
     ];
 
     /**
@@ -23,17 +24,14 @@ class RequestViewing extends Model {
      * @var array
      */
     protected $hidden = [];
-    
-    
 
     public function users()
     {
-        return $this->belongsTo('App\Users','users_id');
+        return $this->belongsTo('App\Users', 'users_id');
     }
 
     public function properties()
     {
-        return $this->belongsTo('App\Properties','property_id');
+        return $this->belongsTo('App\Properties', 'property_id');
     }
-
 }

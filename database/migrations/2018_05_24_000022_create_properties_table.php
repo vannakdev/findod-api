@@ -1,13 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreatePropertiesTable extends Migration
 {
     /**
-     * Schema table name to migrate
+     * Schema table name to migrate.
      * @var string
      */
     public $set_schema_table = 'properties';
@@ -20,7 +20,9 @@ class CreatePropertiesTable extends Migration
      */
     public function up()
     {
-        if (Schema::hasTable($this->set_schema_table)) return;
+        if (Schema::hasTable($this->set_schema_table)) {
+            return;
+        }
         Schema::create($this->set_schema_table, function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -62,14 +64,13 @@ class CreatePropertiesTable extends Migration
             $table->float('pro_square_price')->nullable()->default('0');
             $table->string('pro_thumbnail', 100)->nullable()->default(null);
 
-            $table->index(["pro_search_type"], 'FK_properties_property_type');
+            $table->index(['pro_search_type'], 'FK_properties_property_type');
 
-            $table->index(["pro_currency"], 'FK_properties_currency');
+            $table->index(['pro_currency'], 'FK_properties_currency');
 
-            $table->index(["pro_use_id"], 'FK_properties_users');
+            $table->index(['pro_use_id'], 'FK_properties_users');
             $table->softDeletes();
             $table->timestamps();
-
         });
     }
 
@@ -78,8 +79,8 @@ class CreatePropertiesTable extends Migration
      *
      * @return void
      */
-     public function down()
-     {
-       Schema::dropIfExists($this->set_schema_table);
-     }
+    public function down()
+    {
+        Schema::dropIfExists($this->set_schema_table);
+    }
 }

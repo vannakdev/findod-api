@@ -1,17 +1,18 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class ModifiesForeignKeysToTrendingTable extends Migration {
-
+class ModifiesForeignKeysToTrendingTable extends Migration
+{
     /**
      * Run the migrations.
      *
      * @return void
      */
-    public function up() {
+    public function up()
+    {
         DB::table('trending')->truncate();
         Schema::table('trending', function (Blueprint $table) {
             $table->integer('tre_pro_id')->unsigned()->change();
@@ -28,10 +29,10 @@ class ModifiesForeignKeysToTrendingTable extends Migration {
      *
      * @return void
      */
-    public function down() {
+    public function down()
+    {
         Schema::table('trending', function (Blueprint $table) {
             $table->dropForeign(['tre_pro_id']);
-        }); 
+        });
     }
-
 }

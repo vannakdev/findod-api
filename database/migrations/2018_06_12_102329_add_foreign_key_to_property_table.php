@@ -1,21 +1,21 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class AddForeignKeyToPropertyTable extends Migration {
-
+class AddForeignKeyToPropertyTable extends Migration
+{
     /**
      * Run the migrations.
      *
      * @return void
      */
-    public function up() {
+    public function up()
+    {
         Schema::table('properties', function (Blueprint $table) {
-
-            $table->integer('pro_residence')->unsigned()->nullable(FALSE)->default(0)->comment('Type of property: Condo, Vila,...')->change();
-            $table->integer('pro_currency')->unsigned()->nullable(FALSE)->default(1)->change();
+            $table->integer('pro_residence')->unsigned()->nullable(false)->default(0)->comment('Type of property: Condo, Vila,...')->change();
+            $table->integer('pro_currency')->unsigned()->nullable(false)->default(1)->change();
 
             $table->foreign('pro_residence')
                     ->references('id')->on('residences')
@@ -36,10 +36,10 @@ class AddForeignKeyToPropertyTable extends Migration {
      *
      * @return void
      */
-    public function down() {
+    public function down()
+    {
         Schema::table('properties', function (Blueprint $table) {
             // $table->dropForeign(['pro_residence', 'pro_search_type','pro_currency']);
         });
     }
-
 }

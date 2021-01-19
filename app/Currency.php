@@ -1,10 +1,11 @@
 <?php
 
 namespace App;
+
 use Illuminate\Database\Eloquent\Model;
 
-class Currency extends Model {
-
+class Currency extends Model
+{
     /**
      * The attributes that are mass assignable.
      *
@@ -14,7 +15,7 @@ class Currency extends Model {
     protected $fillable = [
         'id',
         'title',
-        'sign'
+        'sign',
     ];
 
     /**
@@ -23,11 +24,9 @@ class Currency extends Model {
      * @var array
      */
     protected $hidden = ['id'];
-    
 
     public function properties()
     {
         return $this->hasMany('App\Properties');
     }
-
 }

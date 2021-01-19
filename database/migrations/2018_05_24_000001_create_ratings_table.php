@@ -1,13 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateRatingsTable extends Migration
 {
     /**
-     * Schema table name to migrate
+     * Schema table name to migrate.
      * @var string
      */
     public $set_schema_table = 'ratings';
@@ -20,7 +20,9 @@ class CreateRatingsTable extends Migration
      */
     public function up()
     {
-        if (Schema::hasTable($this->set_schema_table)) return;
+        if (Schema::hasTable($this->set_schema_table)) {
+            return;
+        }
         Schema::create($this->set_schema_table, function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -30,9 +32,9 @@ class CreateRatingsTable extends Migration
             $table->string('comments')->nullable()->default(null);
             $table->char('status', 2)->default('1');
 
-            $table->index(["property_id"], 'FK_ratings_properties');
+            $table->index(['property_id'], 'FK_ratings_properties');
 
-            $table->unique(["user_id", "property_id"], 'user_id_property_id');
+            $table->unique(['user_id', 'property_id'], 'user_id_property_id');
             $table->timestamps();
         });
     }
@@ -42,8 +44,8 @@ class CreateRatingsTable extends Migration
      *
      * @return void
      */
-     public function down()
-     {
-       Schema::dropIfExists($this->set_schema_table);
-     }
+    public function down()
+    {
+        Schema::dropIfExists($this->set_schema_table);
+    }
 }

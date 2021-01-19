@@ -13,9 +13,9 @@ class SocailTableSeeder extends Seeder
     {
         DB::table('social')->truncate();
         DB::table('social')->insert([
-            ['id'=>1,'provider' => 'Facebook'],
-            ['id'=>2,'provider' => 'Google'],
-            ['id'=>3,'provider' => 'Find OD APP']
+            ['id'=>1, 'provider' => 'Facebook'],
+            ['id'=>2, 'provider' => 'Google'],
+            ['id'=>3, 'provider' => 'Find OD APP'],
         ]);
     }
 }

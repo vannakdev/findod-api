@@ -1,10 +1,11 @@
 <?php
 
 namespace App;
+
 use Illuminate\Database\Eloquent\Model;
 
-class Tags extends Model {
-
+class Tags extends Model
+{
     /**
      * The attributes that are mass assignable.
      *
@@ -13,7 +14,7 @@ class Tags extends Model {
     protected $table = 'tags';
     protected $fillable = [
         'id',
-        'title'
+        'title',
     ];
 
     /**
@@ -25,8 +26,6 @@ class Tags extends Model {
 
     public function advertisement()
     {
-        return $this->belongsToMany('App\Advertisement','advertisement_tags','tag_id','advertisement_id');
+        return $this->belongsToMany('App\Advertisement', 'advertisement_tags', 'tag_id', 'advertisement_id');
     }
-
-
 }

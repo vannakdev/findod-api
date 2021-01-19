@@ -2,11 +2,11 @@
 
 namespace App\Observers;
 
-use App\RequestViewing;
 use App\Http\Controllers\NotificationController;
+use App\RequestViewing;
 
-class RequestViewingObserver {
-
+class RequestViewingObserver
+{
     public $module = 'RequestViewing';
 
     /**
@@ -15,12 +15,12 @@ class RequestViewingObserver {
      * @param  \App\RequestViewing  $RequestViewing
      * @return void
      */
-    public function created(RequestViewing $RequestViewing) {
-        
+    public function created(RequestViewing $RequestViewing)
+    {
         $property = \App\Properties::find($RequestViewing->property_id);
         $user = [$property->users()->first()];
 
-        foreach ($user as $key){
+        foreach ($user as $key) {
             $use_id = $key['id'];
         }
         $request = [
@@ -31,13 +31,13 @@ class RequestViewingObserver {
                 'user_id' =>$use_id,
                 'sender_id' => $RequestViewing->user_id,
                 'properties_id' => $RequestViewing->property_id,
-                'comments'=>$RequestViewing->description
-            ]
+                'comments'=>$RequestViewing->description,
+            ],
         ];
 
-        
         $notify = new NotificationController();
         $notify->sentNotify($request);
+
         return true;
     }
 
@@ -47,8 +47,8 @@ class RequestViewingObserver {
      * @param  \App\Rating  $rating
      * @return void
      */
-    public function deleting(Rating $rating) {
+    public function deleting(Rating $rating)
+    {
         //
     }
-
 }

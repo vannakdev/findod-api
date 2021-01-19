@@ -1,13 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateResidencesTable extends Migration {
-
+class CreateResidencesTable extends Migration
+{
     /**
-     * Schema table name to migrate
+     * Schema table name to migrate.
      * @var string
      */
     public $set_schema_table = 'residences';
@@ -18,9 +18,11 @@ class CreateResidencesTable extends Migration {
      *
      * @return void
      */
-    public function up() {
-        if (Schema::hasTable($this->set_schema_table))
+    public function up()
+    {
+        if (Schema::hasTable($this->set_schema_table)) {
             return;
+        }
         Schema::create($this->set_schema_table, function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -36,8 +38,8 @@ class CreateResidencesTable extends Migration {
      *
      * @return void
      */
-    public function down() {
+    public function down()
+    {
         Schema::dropIfExists($this->set_schema_table);
     }
-
 }

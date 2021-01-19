@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Laravel\Lumen\Routing\Controller as BaseController;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Routing\Controller as BaseController;
 
 class Controller extends BaseController
 {
-    public function getResponseData(String $status, String $message, $data)
-    {
-        return response()->json(['status' => $status, 'message' => $message, 'data' => $data]);
-    }
+    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 }

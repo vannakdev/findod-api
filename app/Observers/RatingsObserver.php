@@ -2,13 +2,13 @@
 
 namespace App\Observers;
 
-use App\Ratings;
 use App\Http\Controllers\NotificationController;
 use App\Properties;
+use App\Ratings;
 use Illuminate\Support\Facades\DB;
 
-class RatingsObserver {
-
+class RatingsObserver
+{
     public $module = 'rating';
 
     /**
@@ -17,8 +17,8 @@ class RatingsObserver {
      * @param  \App\Rating  $rating
      * @return void
      */
-    public function created(Ratings $rating) {
-
+    public function created(Ratings $rating)
+    {
         $property = Properties::find($rating->property_id);
         $user = [$property->users()->first()];
 //
@@ -39,8 +39,8 @@ class RatingsObserver {
 //        $notify = new NotificationController();
 //        $notify->sentNotify($request);
         $notify = new NotificationController();
-        $notify->sendRatingAndReview($rating,$user);
-        
+        $notify->sendRatingAndReview($rating, $user);
+
         ///=============Update property review counter=============
         $property->pro_rating = Ratings::avg('stars');
         $property->comment_count++;
@@ -60,8 +60,8 @@ class RatingsObserver {
      * @param  \App\Rating  $rating
      * @return void
      */
-    public function deleting(Rating $rating) {
+    public function deleting(Rating $rating)
+    {
         //
     }
-
 }

@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class AddShortDescriptionColumnToAdvertisementsTable extends Migration
 {
@@ -13,8 +13,8 @@ class AddShortDescriptionColumnToAdvertisementsTable extends Migration
      */
     public function up()
     {
-      Schema::table('advertisements', function (Blueprint $table) {
-             $table->string('short_description', 255)->nullable(false)->default('')->after('slug');
+        Schema::table('advertisements', function (Blueprint $table) {
+            $table->string('short_description', 255)->nullable(false)->default('')->after('slug');
         });
     }
 
@@ -25,8 +25,8 @@ class AddShortDescriptionColumnToAdvertisementsTable extends Migration
      */
     public function down()
     {
-       Schema::table('advertisements', function (Blueprint $table) {
-           $table->dropColumn('short_description');
+        Schema::table('advertisements', function (Blueprint $table) {
+            $table->dropColumn('short_description');
         });
     }
 }

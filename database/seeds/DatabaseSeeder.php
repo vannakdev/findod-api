@@ -4,7 +4,6 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-
     /**
      * Run the database seeds.
      *
@@ -49,5 +48,4 @@ class DatabaseSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         //End To sovle the foreign Key when perform the truncate operation
     }
-
 }

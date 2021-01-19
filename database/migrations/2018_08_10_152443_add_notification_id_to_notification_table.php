@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class AddNotificationIdToNotificationTable extends Migration
 {
@@ -14,7 +14,7 @@ class AddNotificationIdToNotificationTable extends Migration
     public function up()
     {
         Schema::table('notifications', function (Blueprint $table) {
-            $table->string('notification_id',100)->nullable()->default('')->index();
+            $table->string('notification_id', 100)->nullable()->default('')->index();
         });
     }
 
