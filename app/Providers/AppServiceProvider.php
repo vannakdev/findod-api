@@ -2,20 +2,19 @@
 
 namespace App\Providers;
 
-use App\Ratings;
-use App\Users;
-use App\Properties;
-use App\RequestViewing;
-use Illuminate\Support\Facades\Schema;
+use App\Observers\PropertiesObserver;
 use App\Observers\RatingsObserver;
 use App\Observers\RequestViewingObserver;
 use App\Observers\UsersObserver;
-use App\Observers\PropertiesObserver;
+use App\Properties;
+use App\Ratings;
+use App\RequestViewing;
+use App\Users;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-
     /**
      * Bootstrap any application services.
      *
@@ -47,6 +46,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton('mailer', function ($app) {
             $app->configure('services');
+
             return $app->loadComponent('mail', 'Illuminate\Mail\MailServiceProvider', 'mailer');
         });
     }
