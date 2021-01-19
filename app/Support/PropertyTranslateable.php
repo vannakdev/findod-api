@@ -4,15 +4,16 @@ namespace App\Support;
 
 //use Illuminate\Http\Request;
 
-trait PropertyTranslateable {
-
+trait PropertyTranslateable
+{
 //    public $requestData;
 
-//=====================Run insert/update chaild table
-    protected static function boot() {
+    //=====================Run insert/update chaild table
+    protected static function boot()
+    {
         parent::boot();
 
-        static::create(function($model) {
+        static::create(function ($model) {
             //Let's get our supported configurations from the config file we've created
             $languages = ['en', 'kh', 'cn'];
 
@@ -28,5 +29,4 @@ trait PropertyTranslateable {
             }
         });
     }
-
 }

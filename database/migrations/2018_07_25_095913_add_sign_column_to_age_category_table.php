@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class AddSignColumnToAgeCategoryTable extends Migration
 {
@@ -14,7 +14,7 @@ class AddSignColumnToAgeCategoryTable extends Migration
     public function up()
     {
         Schema::table('age_category', function (Blueprint $table) {
-            $table->char('sign',7)->nullable();        
+            $table->char('sign', 7)->nullable();
         });
     }
 

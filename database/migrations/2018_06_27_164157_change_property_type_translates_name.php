@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class ChangePropertyTypeTranslatesName extends Migration
 {
@@ -23,7 +23,6 @@ class ChangePropertyTypeTranslatesName extends Migration
      */
     public function down()
     {
-          Schema::rename('property_type_translations','property_type_translates');
-
+        Schema::rename('property_type_translations', 'property_type_translates');
     }
 }

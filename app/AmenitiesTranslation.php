@@ -5,8 +5,8 @@ namespace App;
 //use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 
-class AmenitiesTranslation extends Model {
-
+class AmenitiesTranslation extends Model
+{
     protected $table = 'amenities_translations';
 
     /**
@@ -17,7 +17,7 @@ class AmenitiesTranslation extends Model {
     protected $fillable = [
         'title',
         'locale',
-        'amenity_id'
+        'amenity_id',
     ];
 
     /**
@@ -25,10 +25,10 @@ class AmenitiesTranslation extends Model {
      *
      * @var array
      */
-    protected $hidden = ['id', 'created_at', 'updated_at','amenity_id','locale'];
+    protected $hidden = ['id', 'created_at', 'updated_at', 'amenity_id', 'locale'];
 
-    public function Amenities() {
+    public function Amenities()
+    {
         return $this->belongsTo('App\Amenities', 'amenity_id');
     }
-
 }

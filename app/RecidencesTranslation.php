@@ -4,8 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class RecidencesTranslation extends Model {
-
+class RecidencesTranslation extends Model
+{
     /**
      * The attributes that are mass assignable.
      *
@@ -15,7 +15,7 @@ class RecidencesTranslation extends Model {
     protected $fillable = [
         'res_title',
         'locale',
-        'residence_id'
+        'residence_id',
     ];
 
     /**
@@ -24,5 +24,4 @@ class RecidencesTranslation extends Model {
      * @var array
      */
     protected $hidden = ['id', 'created_at', 'updated_at'];
-
 }

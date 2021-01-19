@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateProjectNameTranslationsTable extends Migration
 {
@@ -13,8 +13,9 @@ class CreateProjectNameTranslationsTable extends Migration
      */
     public function up()
     {
-        if (Schema::hasTable('project_name_translations'))
-        return;
+        if (Schema::hasTable('project_name_translations')) {
+            return;
+        }
         Schema::create('project_name_translations', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');

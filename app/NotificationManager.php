@@ -4,8 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class NotificationManager extends Model {
-
+class NotificationManager extends Model
+{
     /**
      * The attributes that are mass assignable.
      *
@@ -13,7 +13,7 @@ class NotificationManager extends Model {
      */
     protected $table = 'notification_manager';
     protected $fillable = [
-        'module', 'event', 'type'
+        'module', 'event', 'type',
     ];
 //    protected $with = ['notifyContent'];
 
@@ -24,12 +24,11 @@ class NotificationManager extends Model {
      */
     protected $hidden = ['updated_at', 'deleted_at', 'event', 'id', 'created_at'];
 
-    
     /**
      * The Notification that have many contents.
      */
-    public function notifyContent() {
+    public function notifyContent()
+    {
         return $this->hasMany('App\NotificationManagerContents')->where('locale', app('translator')->getLocale());
     }
-
 }

@@ -12,21 +12,21 @@ class ResidenceTypeTableSeeder extends Seeder
     public function run()
     {
         \App\ResidenceType::query()->delete();
-        $data=[
+        $data = [
             [
-                "id" =>1,
-                "status" =>1
+                'id' =>1,
+                'status' =>1,
             ],
             [
-                "id" =>2,
-                "status" =>1
+                'id' =>2,
+                'status' =>1,
             ],
             [
-                "id" =>3,
-                "status" =>1
-            ]
+                'id' =>3,
+                'status' =>1,
+            ],
         ];
-        foreach($data as $record){
+        foreach ($data as $record) {
             \App\ResidenceType::create($record);
         }
     }

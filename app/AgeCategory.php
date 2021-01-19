@@ -4,8 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class AgeCategory extends Model {
-
+class AgeCategory extends Model
+{
     /**
      * The attributes that are mass assignable.
      *
@@ -13,14 +13,12 @@ class AgeCategory extends Model {
      */
     protected $table = 'age_category';
     protected $fillable = [];
-    protected $hidden = ["created_at", "updated_at",'status'];
-    
-    
-    
+    protected $hidden = ['created_at', 'updated_at', 'status'];
+
     protected $with = ['translation'];
 
-    public function translation() {
+    public function translation()
+    {
         return $this->hasMany('App\AgeCategoryTranslation')->where('locale', '=', app('translator')->getLocale());
     }
-
 }

@@ -4,13 +4,10 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+class AgeCategoryTranslation extends Model
+{
+    protected $table = 'age_category_translations';
 
-
-class AgeCategoryTranslation extends Model {
-
-    
-     protected $table = 'age_category_translations';
-    
     /**
      * The attributes that are mass assignable.
      *
@@ -19,7 +16,7 @@ class AgeCategoryTranslation extends Model {
     protected $fillable = [
         'title',
         'locale',
-        'age_category_id'
+        'age_category_id',
     ];
 
     /**
@@ -27,9 +24,10 @@ class AgeCategoryTranslation extends Model {
      *
      * @var array
      */
-    protected $hidden = ['id','locale', 'created_at', 'updated_at','age_category_id'];
+    protected $hidden = ['id', 'locale', 'created_at', 'updated_at', 'age_category_id'];
 
-    public function AgeCategory() {
+    public function AgeCategory()
+    {
         return $this->belongsTo('App\AgeCategory', 'age_category_id');
     }
 }

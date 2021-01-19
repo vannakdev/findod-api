@@ -2,7 +2,7 @@
 
 return [
 //================Form validation===============================
-    'unique' => "The :attributes has already been taken.",
+    'unique' => 'The :attributes has already been taken.',
     'min' => 'The :attribute name may not be greater than 50 characters.',
     'max' => 'The :attribute must be at least 8 characters.',
     'numeric' => ':attribute can only contain numbers.',
@@ -15,14 +15,14 @@ return [
     'email' => 'The :attribute must be a valid email address.',
     'same' => 'The :attribute and password must match.',
     'exists' => 'The selected :attribute is invalid.',
-    'active_url' => "The :attribute is not a valid URL.",
+    'active_url' => 'The :attribute is not a valid URL.',
     //=============7/26/2018==========
-    'digits_between' => "The :attribute under validation must have a length between the given :min and :max.",
+    'digits_between' => 'The :attribute under validation must have a length between the given :min and :max.',
     'dimensions' => 'The :attribute  must be an image meeting the dimension constraints.',
-    'attributes' => array(
+    'attributes' => [
         //==============User module========================
         'email' => 'email',
-        'first_name' => "first name",
+        'first_name' => 'first name',
         'last_name' => 'last name',
         'country_code' => 'contry code',
         'company_name' => 'company name',
@@ -52,7 +52,6 @@ return [
         'pro_status' => 'Property status',
         'pro_age' => 'Property age',
         'pro_detail' => 'Property detail',
-        
-    )
-];
 
+    ],
+];

@@ -5,8 +5,8 @@ namespace App;
 //use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 
-class Residence extends Model {
-
+class Residence extends Model
+{
     /**
      * The attributes that are mass assignable.
      *
@@ -16,7 +16,7 @@ class Residence extends Model {
     protected $fillable = [
         'id',
         'res_title',
-        'res_amenitie'
+        'res_amenitie',
     ];
 
     /**
@@ -25,37 +25,40 @@ class Residence extends Model {
      * @var array
      */
     protected $hidden = [
-        'res_amenities', 
-        'status', 
-        'created_at', 
-        'updated_at', 
-        'position', 
+        'res_amenities',
+        'status',
+        'created_at',
+        'updated_at',
+        'position',
         'color_code',
         'residence_type_id',
-        'translation'
+        'translation',
     ];
     //=================Residence traislation ============================
     protected $with = ['translation'];
 
 //
-    public function getResTitleAttribute($value) {
+    public function getResTitleAttribute($value)
+    {
         if ($this->translation->first()):
             return $this->translation->first()->res_title;
         endif;
+
         return $value;
     }
 
-    public function translation() {
+    public function translation()
+    {
         return $this->hasMany('App\RecidencesTranslation')->where('locale', '=', app('translator')->getLocale());
     }
 
     //=============================================
-    public function getIconAttribute($value) {
-        if (isset($value) AND $value != '') {
-
-            return env('APP_URL') . 'uploads/residences/' . $value;
+    public function getIconAttribute($value)
+    {
+        if (isset($value) and $value != '') {
+            return env('APP_URL').'uploads/residences/'.$value;
         }
+
         return '';
     }
-
 }

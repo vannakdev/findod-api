@@ -1,10 +1,11 @@
 <?php
 
 namespace App;
+
 use Illuminate\Database\Eloquent\Model;
 
-class Role extends Model {
-
+class Role extends Model
+{
     /**
      * The attributes that are mass assignable.
      *
@@ -13,7 +14,7 @@ class Role extends Model {
     protected $table = 'user_role';
     protected $fillable = [
         'id',
-        'title'
+        'title',
     ];
 
     /**
@@ -22,13 +23,9 @@ class Role extends Model {
      * @var array
      */
     protected $hidden = [];
-    
-    
 
     public function users()
     {
         return $this->hasMany('App\Users');
     }
-
-
 }

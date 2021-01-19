@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateProjectNameTable extends Migration
 {
@@ -13,13 +13,14 @@ class CreateProjectNameTable extends Migration
      */
     public function up()
     {
-        if (Schema::hasTable('project_name'))
-        return;
+        if (Schema::hasTable('project_name')) {
+            return;
+        }
         Schema::create('project_name', function (Blueprint $table) {
-            $table->engine = 'InnoDB'; 
+            $table->engine = 'InnoDB';
             $table->increments('id');
-            $table->string('lat',11)->default(0);
-            $table->string('lng',11)->default(0);
+            $table->string('lat', 11)->default(0);
+            $table->string('lng', 11)->default(0);
 
             $table->string('address', 200)->nullable();
             $table->string('hotline', 20)->nullable();
@@ -28,7 +29,6 @@ class CreateProjectNameTable extends Migration
             $table->integer('floor_category_id')->unsigned()->nullable();
 
             $table->timestamps();
-
         });
     }
 
@@ -42,7 +42,5 @@ class CreateProjectNameTable extends Migration
         Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('project_name');
         Schema::enableForeignKeyConstraints();
-
-       
     }
 }

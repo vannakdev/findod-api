@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class AddSlugColumnToAdvertisementsTable extends Migration
 {
@@ -14,7 +14,7 @@ class AddSlugColumnToAdvertisementsTable extends Migration
     public function up()
     {
         Schema::table('advertisements', function (Blueprint $table) {
-             $table->string('slug', 255)->nullable(false)->default('')->after('title');
+            $table->string('slug', 255)->nullable(false)->default('')->after('title');
         });
     }
 
@@ -26,7 +26,7 @@ class AddSlugColumnToAdvertisementsTable extends Migration
     public function down()
     {
         Schema::table('advertisements', function (Blueprint $table) {
-           $table->dropColumn('slug');
+            $table->dropColumn('slug');
         });
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App;
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class GalleryDetail extends Model
 {
@@ -39,10 +39,10 @@ class GalleryDetail extends Model
             unlink(base_path('public/uploads/gallery/thumbnail/'.$model->filename));
         }
 
-        GalleryDetail::where('gallery_id', $model->gallery_id)
+        self::where('gallery_id', $model->gallery_id)
                      ->where('order', '>', $model->order)
                      ->update([
-                        'order' => DB::raw('`order` - 1 ')
+                        'order' => DB::raw('`order` - 1 '),
                      ]);
     }
 }

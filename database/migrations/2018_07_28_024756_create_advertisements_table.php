@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateAdvertisementsTable extends Migration
 {
@@ -13,11 +13,11 @@ class CreateAdvertisementsTable extends Migration
      */
     public function up()
     {
-        Schema::create('advertisements', function (Blueprint $table) {           
+        Schema::create('advertisements', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
             $table->string('title', 255)->nullable(false)->default('');
-            $table->string('feature_image',255)->nullable(false)->default('');
+            $table->string('feature_image', 255)->nullable(false)->default('');
             $table->date('start_date')->nullable(false);
             $table->date('end_date')->nullable(false);
             $table->integer('user_id')->unsigned();
@@ -27,9 +27,6 @@ class CreateAdvertisementsTable extends Migration
 
             $table->foreign('user_id')->references('id')->on('users');
         });
-
-
-  
     }
 
     /**

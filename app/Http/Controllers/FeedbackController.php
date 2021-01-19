@@ -1,29 +1,30 @@
 <?php
 /**
- * Global class for system notification
+ * Global class for system notification.
  *
  * @author OU Sophea : ODIC
  */
 
 namespace App\Http\Controllers;
 
-use Validator;
 use App\Feedback;
-use Illuminate\Http\Request;
 use App\Http\Controllers\ResponderController;
+use Illuminate\Http\Request;
+use Validator;
 
 /**
- * Description of newPHPClass
+ * Description of newPHPClass.
  *
  * @author OU Sophea : ODIC
  */
-class FeedbackController extends Controller {
-
-    public function __construct() {
-        
+class FeedbackController extends Controller
+{
+    public function __construct()
+    {
     }
 
-    public function create(Request $request) {
+    public function create(Request $request)
+    {
         $validator = Validator::make($request->all(), [
                     'name' => 'required|max:50|regex:/^[\pL\s\-]+$/u',
                     'email' => 'required|email|max:50',
@@ -32,9 +33,9 @@ class FeedbackController extends Controller {
         );
 
         if ($validator->fails()) {
-            return $this->getResponseData("0", "Data validation failed.", $validator->errors()->first());
+            return $this->getResponseData('0', 'Data validation failed.', $validator->errors()->first());
         }
-        
+
         //create feedback object and assign value from request's data
         $feedback = new Feedback();
 
@@ -43,10 +44,10 @@ class FeedbackController extends Controller {
         $feedback->message = $request->input('message');
 
         //commit save user into the database.
-        if(!$feedback->save()){
-            return $this->getResponseData("0", "Feedback submit faild, please try again.",'');
+        if (! $feedback->save()) {
+            return $this->getResponseData('0', 'Feedback submit faild, please try again.', '');
         }
-        return $this->getResponseData("1", "User have been created successfully", $feedback->fresh());
-    }
 
+        return $this->getResponseData('1', 'User have been created successfully', $feedback->fresh());
+    }
 }

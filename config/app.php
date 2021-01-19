@@ -80,7 +80,7 @@ return [
 
     'available_locale' => [
         'en' => 'English',
-        'km' => 'ភាសាខ្មែរ'
+        'km' => 'ភាសាខ្មែរ',
     ],
 
     'locale' => 'en',
@@ -113,6 +113,6 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
-    'google_api_key' => env('GOOGLE_API_KEY')
+    'google_api_key' => env('GOOGLE_API_KEY'),
 
 ];

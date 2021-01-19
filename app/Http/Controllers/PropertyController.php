@@ -1,99 +1,97 @@
 <?php
 
 /**
- * Global class for system notification
+ * Global class for system notification.
  *
  * @author OU Sophea : ODIC
  */
 
 namespace App\Http\Controllers;
 
-use Validator;
-use App\Properties;
 use App\Http\Controllers\ResponderController;
-//use App\Amenities;
+use App\Properties;
 use App\Residence;
+//use App\Amenities;
 use App\Trendings;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 //use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Intervention\Image\Facades\Image;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Validator;
 
 //use Illuminate\Support\Facades\Schema;
 //use Illuminate\Support\Carbon;
 //use Symfony\Component\HttpFoundation\File\File;
 //use App\Notification;
 
-class PropertyController extends Controller {
+class PropertyController extends Controller
+{
+    protected static $number_per_page = 25;
+    protected static $distance = 1000;
+    protected static $admin_role = 1;
+    protected static $minPhoto = 3;
+    protected static $maxPhoto = 15;
+    protected static $property_video_path = __DIR__.'/../../../public/uploads/property_videos/';
+    protected static $property_photos_path = __DIR__.'/../../../public/uploads/property_images/';
+    protected static $property_plan_path = __DIR__.'/../../../public/uploads/property_plan_images/';
+    protected static $amenity_directory = __DIR__.'/../../../public/uploads/amenities/';
+    protected static $residence_directory = __DIR__.'/../../../public/uploads/residences/';
+    protected static $advertisement_directory = __DIR__.'/../../../public/uploads/advertisements/';
+    protected static $test_photos_path = __DIR__.'/../../../public/uploads/test/';
 
-    static protected $number_per_page = 25;
-    static protected $distance = 1000;
-    static protected $admin_role = 1;
-    static protected $minPhoto = 3;
-    static protected $maxPhoto = 15;
-    static protected $property_video_path = __DIR__ . '/../../../public/uploads/property_videos/';
-    static protected $property_photos_path = __DIR__ . '/../../../public/uploads/property_images/';
-    static protected $property_plan_path = __DIR__ . '/../../../public/uploads/property_plan_images/';
-    static protected $amenity_directory = __DIR__ . '/../../../public/uploads/amenities/';
-    static protected $residence_directory = __DIR__ . '/../../../public/uploads/residences/';
-    static protected $advertisement_directory = __DIR__ . '/../../../public/uploads/advertisements/';
-    static protected $test_photos_path = __DIR__ . '/../../../public/uploads/test/';
-
-    public function __construct() {
-        
+    public function __construct()
+    {
     }
 
-    public function showAllProperty() {
-
+    public function showAllProperty()
+    {
         $paginator = Properties::paginate(self::$number_per_page);
         $properties = $paginator->getCollection();
+
         return response()->json($paginator);
     }
 
-    public function showOneProperty($id) {
+    public function showOneProperty($id)
+    {
         return response()->json(Properties::find($id));
     }
 
     /**
-     * Get a detail property
+     * Get a detail property.
      * @param  int  $id Require a property id
      * @return A property all information
      */
-    public function propertyDetail($id, Request $request = null) {
+    public function propertyDetail($id, Request $request = null)
+    {
         $user = Auth::user();
         $responder = new ResponderController;
 
-
-        $getProperty = Properties::with(["amenities", "currency", "residence", 'propertyPhotos'])
+        $getProperty = Properties::with(['amenities', 'currency', 'residence', 'propertyPhotos'])
                 ->with([
-                    'users' => function($q) {
+                    'users' => function ($q) {
                         $q->with('role');
-                    }])
+                    }, ])
                 ->withCount([// get numnber of favorit user from the pivot table
-                    'favorites as favorited' => function($query) use ($user) {
+                    'favorites as favorited' => function ($query) use ($user) {
                         $query->where('users_id', $user->id); //condition on user id getting from favorite table
-                    }
+                    },
                 ])
                 ->withCount([
-                    'request_viewing as request_viewing' => function ($query) use($user) {
-                        $query->where('users_id', $user->id); //condition on user id getting from favorite table 
-                    }
+                    'request_viewing as request_viewing' => function ($query) use ($user) {
+                        $query->where('users_id', $user->id); //condition on user id getting from favorite table
+                    },
                 ])
                 ->where('properties.id', $id)
                 ->first();
 
-
-        if (!$getProperty) {
+        if (! $getProperty) {
             return $responder->returnMessage(0, 'Property', 5);
         }
 
-
         $getProperty->makeHidden('pro_photos');
         $getProperty->makeHidden('pro_plan');
-
-
 
 //        if (!is_null($getProperty['project_name_id'])):
 //            $getProperty->with('project_name');
@@ -102,18 +100,17 @@ class PropertyController extends Controller {
 
         $propertyDetail = $getProperty;
 
-
-        if ($getProperty == NULL):
+        if ($getProperty == null) :
             return $responder->returnMessage(0, 'Property', 5);
         endif;
 //      =======================Update property user view counter ====================================
         $getProperty->pro_view_counter++;
         $getProperty->timestamps = false;
         $getProperty->save();
-//      =============================================================================================    
+//      =============================================================================================
         $photos = [];
         foreach (json_decode($getProperty->pro_photos) as $key) {
-            array_push($photos, env('APP_URL') . 'uploads/property_images/' . $key);
+            array_push($photos, env('APP_URL').'uploads/property_images/'.$key);
         }
 
 //        ==================Get distance from current location=================================
@@ -123,47 +120,47 @@ class PropertyController extends Controller {
             $propertyDetail['distance_in_km'] = $getDistance;
         }
 
-
 //        ======================Photo list ==================================
         $propertyDetail['photos'] = $photos;
         $plans = [];
-        if ($getProperty->pro_plan != NULL) {
+        if ($getProperty->pro_plan != null) {
             foreach (json_decode($getProperty->pro_plan) as $key) {
-                array_push($plans, env('APP_URL') . 'uploads/property_plan_images/' . $key);
+                array_push($plans, env('APP_URL').'uploads/property_plan_images/'.$key);
             }
         }
         $propertyDetail['plans'] = $plans;
-        $propertyDetail['project_name'] = json_decode("{}");
+        $propertyDetail['project_name'] = json_decode('{}');
 
-        if ($propertyDetail['project_name_id'] != NULL) {
+        if ($propertyDetail['project_name_id'] != null) {
             $project_name = $propertyDetail->project_name()->first();
             $propertyDetail['project_name'] = $project_name;
         }
         //=========================================================================
-        $array_resutl = array();
+        $array_resutl = [];
         $array_resutl['property_detial'] = $propertyDetail;
 
-//================Get similar data=================
+        //================Get similar data=================
         $array_resutl['similar_property'] = $this->similarProperty($getProperty);
 
         $this->setTrending($id); // insert view record to database;
 
-        return $responder->returnMessage(1, NULL, NULL, $array_resutl);
+        return $responder->returnMessage(1, null, null, $array_resutl);
     }
 
     /**
-     * Get list of properties that hosting by a login user
-     * 
+     * Get list of properties that hosting by a login user.
+     *
      * @return List of properties  information
      */
-    public function similarProperty($property) {
+    public function similarProperty($property)
+    {
         $properties = new Properties();
         $priceRanges = \App\StatisticOfPriceRanges::all();
         $max_price = $min_price = 0;
         foreach ($priceRanges as $priceRang) {
-            if ($this->in_range($property->pro_price, $priceRang->min_price, $priceRang->max_price, TRUE)):
+            if ($this->in_range($property->pro_price, $priceRang->min_price, $priceRang->max_price, true)) :
                 $min_price = $priceRang->min_price;
-                $max_price = $priceRang->max_price;
+            $max_price = $priceRang->max_price;
             endif;
         }
         if ($max_price == 0) {
@@ -182,20 +179,20 @@ class PropertyController extends Controller {
             'pro_floor',
             'pro_lat', 'pro_lng',
             'pro_residence', 'pro_thumbnail',
-            'pro_search_type'
+            'pro_search_type',
         ];
-        $arraySelectColumn = implode(",", $selectColumns);
+        $arraySelectColumn = implode(',', $selectColumns);
 
         $propertiesNearby = $this->getNearBy($property->pro_lat, $property->pro_lng, $distance, $arraySelectColumn, $property->id);
 
         $nearByList = [];
-        if (!empty($propertiesNearby)) {
-            foreach ($propertiesNearby as $property):
+        if (! empty($propertiesNearby)) {
+            foreach ($propertiesNearby as $property) :
                 array_push($nearByList, $property->id);
             endforeach;
         }
 
-        $similarList = $properties->with(["currency", "residence", 'amenities', 'users'])
+        $similarList = $properties->with(['currency', 'residence', 'amenities', 'users'])
 //                        ->where(function ($query) use ($min_price, $max_price) {
 //                            $query->whereBetween('pro_price', [$min_price, $max_price]);
 //                        })
@@ -204,38 +201,40 @@ class PropertyController extends Controller {
                         ->whereIn('id', $nearByList)
                         ->paginate(self::$number_per_page)->except($property->id);
 
-        if (!empty($similarList)) {
+        if (! empty($similarList)) {
             return $similarList;
         }
+
         return [];
     }
 
-    public function getNearBy($lat, $lng, $distance, $arraySelectColumn, $id) {
-
+    public function getNearBy($lat, $lng, $distance, $arraySelectColumn, $id)
+    {
         return Properties::getPropertyByDistance($lat, $lng, $distance, $arraySelectColumn)->get()->except($id);
     }
 
     /**
-     * Determines if $number is between $min and $max
+     * Determines if $number is between $min and $max.
      *
-     * @param  integer  $number     The number to test
-     * @param  integer  $min        The minimum value in the range
-     * @param  integer  $max        The maximum value in the range
-     * @param  boolean  $inclusive  Whether the range should be inclusive or not
-     * @return boolean              Whether the number was in the range
+     * @param  int  $number     The number to test
+     * @param  int  $min        The minimum value in the range
+     * @param  int  $max        The maximum value in the range
+     * @param  bool  $inclusive  Whether the range should be inclusive or not
+     * @return bool              Whether the number was in the range
      */
-    function in_range($number, $min, $max, $inclusive = FALSE) {
+    public function in_range($number, $min, $max, $inclusive = false)
+    {
         if (is_int($number) && is_int($min) && is_int($max)) {
             return $inclusive ? ($number >= $min && $number <= $max) : ($number > $min && $number < $max);
         }
 
-        return FALSE;
+        return false;
     }
 
 //      public function similarProperty001($property) {
 //        $selectColumn = ['properties.id', 'pro_currency', 'pro_public_id', 'pro_title', 'pro_rating', 'pro_floor',
 //            'pro_address', 'pro_price', 'pro_lat', 'pro_lng', 'pro_residence', 'pro_use_id',
-////            'pro_photos',
+    ////            'pro_photos',
 //            'pro_bed_rooms', 'pro_bath_rooms', 'pro_square_feet', 'created_at', 'pro_thumbnail', 'pro_search_type'];
 //        $properties = new Properties();
 //        $photoObject = $properties->select($selectColumn)
@@ -245,8 +244,8 @@ class PropertyController extends Controller {
 //                        })
 //                        ->orWhere('pro_city', 'LIKE', '%' . $property->pro_city . '%')
 //                        ->where('pro_residence', $property->pro_residence)
-////                        ->where('pro_lng','LIKE', $property->pro_lng)
-////                        ->where('pro_lat','LIKE', $property->pro_lat)
+    ////                        ->where('pro_lng','LIKE', $property->pro_lng)
+    ////                        ->where('pro_lat','LIKE', $property->pro_lat)
 //                        ->paginate(self::$number_per_page)->except($property->id);
 //
 //        if ($photoObject) {
@@ -256,32 +255,31 @@ class PropertyController extends Controller {
 //        return [];
 //    }
 
-
-
-    public function propertyByFavorite() {
+    public function propertyByFavorite()
+    {
         $responder = new ResponderController;
         $user = Auth::user();
         $properties = Properties::withoutGlobalScopes([\App\Scopes\PropertyScope::class])
-                ->with(["currency", "residence", 'project_name'])
+                ->with(['currency', 'residence', 'project_name'])
                 ->whereHas(
-                "favorites", function($query) use ($user) {
-            $query->where('users_id', $user->id);
-        });
+                'favorites', function ($query) use ($user) {
+                    $query->where('users_id', $user->id);
+                });
 
         try {
             $getProperty = $properties->paginate(self::$number_per_page);
-            if ($getProperty != NULL):
+            if ($getProperty != null) :
                 $propertList = [];
-                foreach ($getProperty as $property) {
-                    $setProperty = $property;
-                    if ($property->users == NULL):
+            foreach ($getProperty as $property) {
+                $setProperty = $property;
+                if ($property->users == null) :
                         $setProperty->pro_active = 0;
-                    endif;
+                endif;
 
-                    array_push($propertList, $setProperty);
-                }
-                return $responder->returnMessage(1, NULL, NULL, $propertList);
-            else:
+                array_push($propertList, $setProperty);
+            }
+
+            return $responder->returnMessage(1, null, null, $propertList); else :
                 return $responder->returnMessage(0, 'Property', 5);
             endif;
         } catch (\Exception $e) {
@@ -289,48 +287,48 @@ class PropertyController extends Controller {
         }
     }
 
-    public function propertyByFavoriteWeb(Request $request) {
+    public function propertyByFavoriteWeb(Request $request)
+    {
         $responder = new ResponderController;
         $user = Auth::user();
         $properties = Properties::withoutGlobalScopes([\App\Scopes\PropertyScope::class])
-                ->with(["currency", "residence", "project_name"])
+                ->with(['currency', 'residence', 'project_name'])
                 ->whereHas(
-                "favorites", function($query) use ($user) {
-            $query->where('users_id', $user->id);
-        });
-
+                'favorites', function ($query) use ($user) {
+                    $query->where('users_id', $user->id);
+                });
 
         //        ==================Sort data==========================
         $params = $request->query();
-        if (isset($params['sort'])):
+        if (isset($params['sort'])) :
             $sortParams = [
                 'date_asc' => ['created_at' => 'asc'],
                 'date_desc' => ['created_at' => 'desc'],
                 'price_asc' => ['pro_price' => 'asc'],
-                'price_desc' => ['pro_price' => 'desc']
+                'price_desc' => ['pro_price' => 'desc'],
             ];
-            if (array_key_exists($params['sort'], $sortParams)):
+        if (array_key_exists($params['sort'], $sortParams)) :
                 $sortBy = $sortParams[$params['sort']];
-                foreach ($sortBy as $key => $value):
-                    $properties->orderBy('properties.' . $key, $value);
-                endforeach;
-            endif;
+        foreach ($sortBy as $key => $value) :
+                    $properties->orderBy('properties.'.$key, $value);
+        endforeach;
+        endif;
         endif;
 //        ========================================================
         try {
             $getProperty = $properties->paginate(self::$number_per_page);
-            if ($getProperty != NULL):
+            if ($getProperty != null) :
                 $propertList = [];
-                foreach ($getProperty as $property) {
-                    $setProperty = $property;
-                    if ($property->users == NULL):
+            foreach ($getProperty as $property) {
+                $setProperty = $property;
+                if ($property->users == null) :
                         $setProperty->pro_active = 0;
-                    endif;
+                endif;
 
-                    array_push($propertList, $setProperty);
-                }
-                return $responder->returnMessage(1, NULL, NULL, $propertList);
-            else:
+                array_push($propertList, $setProperty);
+            }
+
+            return $responder->returnMessage(1, null, null, $propertList); else :
                 return $responder->returnMessage(0, 'Property', 5);
             endif;
         } catch (\Exception $e) {
@@ -339,11 +337,12 @@ class PropertyController extends Controller {
     }
 
     /**
-     * Get list of properties that hosting by a login user
-     * 
+     * Get list of properties that hosting by a login user.
+     *
      * @return List of properties  information
      */
-    public function postedPropertyByUser() {
+    public function postedPropertyByUser()
+    {
         $user = Auth::user();
         $responder = new ResponderController;
 
@@ -366,9 +365,9 @@ class PropertyController extends Controller {
             'pro_bed_rooms',
             'pro_bath_rooms',
             'pro_square_feet',
-            'created_at'];
+            'created_at', ];
 
-        $getProperty = Properties::select($selectColumn)->with(["currency", "residence"])
+        $getProperty = Properties::select($selectColumn)->with(['currency', 'residence'])
                         ->where('properties.pro_use_id', $user->id)
                         ->withoutGlobalScopes([\App\Scopes\PropertyScope::class])
                         ->latest()
@@ -378,15 +377,16 @@ class PropertyController extends Controller {
             return $responder->returnMessage(0, 'Property', 5);
         }
 
-        return $responder->returnMessage(1, NULL, NULL, $getProperty['data']);
+        return $responder->returnMessage(1, null, null, $getProperty['data']);
     }
 
     /**
-     * Get list of properties that hosting by a login user by web
-     * 
+     * Get list of properties that hosting by a login user by web.
+     *
      * @return List of properties  information
      */
-    public function postedPropertyByUserWeb() {
+    public function postedPropertyByUserWeb()
+    {
         $user = Auth::user();
         $responder = new ResponderController;
 
@@ -409,31 +409,32 @@ class PropertyController extends Controller {
             'pro_bed_rooms',
             'pro_bath_rooms',
             'pro_square_feet',
-            'created_at'];
+            'created_at', ];
 
-        $getProperty = Properties::select($selectColumn)->with(["currency", "residence"])
+        $getProperty = Properties::select($selectColumn)->with(['currency', 'residence'])
                         ->where('properties.pro_use_id', $user->id)
                         ->withoutGlobalScopes([\App\Scopes\PropertyScope::class])
                         ->latest()
                         ->paginate(self::$number_per_page)->toArray();
-		$total_properties = Properties::where('properties.pro_use_id', $user->id)->count();
-		//dd($total_properties);
+        $total_properties = Properties::where('properties.pro_use_id', $user->id)->count();
+        //dd($total_properties);
 
         if (empty($getProperty['data'])) {
             return $responder->returnMessage(0, 'Property', 5);
         }
-		$data['properties']     = $getProperty['data'];
-		$data['total_property'] = $total_properties;
-		
-        return $responder->returnMessage(1, NULL, NULL,$data);
+        $data['properties'] = $getProperty['data'];
+        $data['total_property'] = $total_properties;
+
+        return $responder->returnMessage(1, null, null, $data);
     }
 
     /**
-     * Get list of properties that hosting by id of posted user
-     * 
+     * Get list of properties that hosting by id of posted user.
+     *
      * @return List of properties  information
      */
-    public function propertyByUserId($id) {
+    public function propertyByUserId($id)
+    {
         $responder = new ResponderController;
         $selectColumn = [
             'properties.id',
@@ -456,9 +457,9 @@ class PropertyController extends Controller {
             'pro_square_feet',
             'favorites_count',
             'project_name_id',
-            'created_at'];
+            'created_at', ];
 
-        $propertyByLastUpdate = Properties::select($selectColumn)->with(["currency", "residence",'project_name'])
+        $propertyByLastUpdate = Properties::select($selectColumn)->with(['currency', 'residence', 'project_name'])
                         ->where('pro_use_id', $id)
                         ->latest()
                         ->paginate(self::$number_per_page)->toArray();
@@ -468,44 +469,43 @@ class PropertyController extends Controller {
             return $responder->returnMessage(0, 'Property', 5);
         }
 
-
         $getProperty['last_update'] = $propertyByLastUpdate['data'];
 
-        $propertyByFavorite = Properties::select($selectColumn)->with(["currency", "residence",'project_name'])
+        $propertyByFavorite = Properties::select($selectColumn)->with(['currency', 'residence', 'project_name'])
                         ->where('pro_use_id', $id)
-                        ->orderBy('favorites_count', "DESC")
+                        ->orderBy('favorites_count', 'DESC')
                         ->paginate(self::$number_per_page)->toArray();
         $getProperty['mose_favorite'] = $propertyByFavorite['data'];
 
-        return $responder->returnMessage(1, NULL, NULL, $getProperty);
+        return $responder->returnMessage(1, null, null, $getProperty);
     }
 
-    public function generatePropertyList($properties) {
-        $getArrayPropreties = Array();
+    public function generatePropertyList($properties)
+    {
+        $getArrayPropreties = [];
         foreach ($properties as $getProperty) {
             $property = $getProperty;
             array_push($getArrayPropreties, $property);
         }
-        Return $getArrayPropreties;
+
+        return $getArrayPropreties;
     }
 
     /**
-     * Toggle favorite property
-     * 
+     * Toggle favorite property.
      */
-    public function toggleFavorite($id) {
+    public function toggleFavorite($id)
+    {
         $user = Auth::user();
         $property = Properties::find($id);
-        if ($property == Null):
-            return $this->getResponseData('0', "Property not found.", '');
+        if ($property == null) :
+            return $this->getResponseData('0', 'Property not found.', '');
         endif;
         $resutl = $property->favorites()->toggle($user->id);
 
         ///=============Update property favorite count=============
-        if (count($resutl['attached']) > 0):
-            $property->favorites_count ++;
-
-        else:
+        if (count($resutl['attached']) > 0) :
+            $property->favorites_count++; else :
             $property->favorites_count = $property->favorites_count - 1;
         endif;
         $property->timestamps = false;
@@ -515,11 +515,12 @@ class PropertyController extends Controller {
     }
 
     /**
-     * Add property to a favorite list by login user
+     * Add property to a favorite list by login user.
      * @param Request $data user id and property id
-     * @return bolean 
+     * @return bolean
      */
-    public function addFavorite(Request $request) {
+    public function addFavorite(Request $request)
+    {
         return $this->toggleFavorite($request->input('property_id'));
     }
 
@@ -527,18 +528,20 @@ class PropertyController extends Controller {
 //    /**
 //     * Remove property from a favorite list by login user
 //     * @param Request $data user id and property id
-//     * @return bolean 
+//     * @return bolean
 //     */
-    public function removeFavorite($id) {
+    public function removeFavorite($id)
+    {
         return $this->toggleFavorite($id);
     }
 
     /**
-     * List property near by user location
+     * List property near by user location.
      * @param Request $data GO location lng & lat
-     * @return array list of property 
+     * @return array list of property
      */
-    public function getFeatureAndNearby(Request $request) {
+    public function getFeatureAndNearby(Request $request)
+    {
         $responder = new ResponderController;
         $selectColumn = [
             'properties.id',
@@ -560,26 +563,27 @@ class PropertyController extends Controller {
             'created_at',
             'updated_at',
             'favorites_count',
-            'project_name_id'
+            'project_name_id',
         ];
         $returnResult['feature'] = $this->showFeatured($request, $selectColumn);
-//===============Get nearest property================;
+        //===============Get nearest property================;
         $returnResult['nearby'] = $this->getNearest($request, $selectColumn);
 
-// ========================Get last update property======================
+        // ========================Get last update property======================
         $returnResult['lastUpdate'] = $this->showLastUpdate($request, $selectColumn);
 
-// ========================Get property have video======================
+        // ========================Get property have video======================
         $returnResult['videos'] = $this->showVideos($selectColumn);
 
 //        ========================= Advertisement===================================
         $advertise = new AdvertisementController;
         $returnResult['advertisement'] = $advertise->index();
 
-        return $responder->returnMessage(1, NULL, NULL, $returnResult);
+        return $responder->returnMessage(1, null, null, $returnResult);
     }
 
-    private function getNearest($request, $selectColumns) {
+    private function getNearest($request, $selectColumns)
+    {
         $distance = 10; //Set defauld 10 km
         if ($request->has('distance')) {
             $distance = $request->input('distance');
@@ -587,27 +591,30 @@ class PropertyController extends Controller {
 
         $validator = Validator::make($request->all(), ['lng' => 'required', 'lat' => 'required']);
 
-        if ($validator->fails()):// check user input
+        if ($validator->fails()) : // check user input
             return [];
         endif;
 
         $lat = $request->input('lat');
         $lng = $request->input('lng');
 
-        $arraySelectColumn = implode(",", $selectColumns);
+        $arraySelectColumn = implode(',', $selectColumns);
         $query = Properties::getPropertyByDistance($lat, $lng, $distance, $arraySelectColumn)->paginate(self::$number_per_page)->toArray();
         if (empty($query)) {
             return [];
         }
+
         return $query['data'];
     }
 
     /**
-     * Get near by location property
-     * @param  array $request user Id,lat & lng 
+     * Get near by location property.
+     * @param  array $request user Id,lat & lng
      * @return list of property with the last most view
      *///localhost/lumenapi/api/featured
-    public function mapCluster(Request $request) {
+
+    public function mapCluster(Request $request)
+    {
         $selectColumns = [
             'id',
             'pro_currency',
@@ -626,7 +633,7 @@ class PropertyController extends Controller {
             'pro_square_feet',
             'created_at',
             'favorites_count',
-            'pro_thumbnail'];
+            'pro_thumbnail', ];
 
         if ($request->has('polygon')) {
             $property = $this->getPolygonData($request, $selectColumns);
@@ -635,41 +642,45 @@ class PropertyController extends Controller {
         }
 
         if (empty($property)) {
-            return $this->getResponseData("1", "Note property found.", $property);
+            return $this->getResponseData('1', 'Note property found.', $property);
         }
         try {
-            return $this->getResponseData("1", "", $property);
+            return $this->getResponseData('1', '', $property);
         } catch (\Exception $e) {
-            return $this->getResponseData("0", "Note property found.", $property);
+            return $this->getResponseData('0', 'Note property found.', $property);
         }
     }
 
-    public function getPolygonData($request, $selectColumns) {
-        $arraySelectColumn = implode(",", $selectColumns);
-        $strPolygon = "'" . implode(",", $request->polygon) . ',' . $request->polygon[0] . "'";
+    public function getPolygonData($request, $selectColumns)
+    {
+        $arraySelectColumn = implode(',', $selectColumns);
+        $strPolygon = "'".implode(',', $request->polygon).','.$request->polygon[0]."'";
         $propertyList = Properties::getPropertyByPolygon($strPolygon, $arraySelectColumn);
 
         if (empty($propertyList)) {
             return [];
         }
-        $ids = array();
-//Extract the id's
+        $ids = [];
+        //Extract the id's
         foreach ($propertyList as $q) {
             array_push($ids, $q->id);
         }
-// Get the listings that match the returned ids
+        // Get the listings that match the returned ids
         $getProperty = Properties::select($selectColumns)
                         ->with('currency', 'residence')
                         ->whereIn('id', $ids)->orderBy('pro_rating', 'DESC')->get();
+
         return $this->generatePropertyList($getProperty);
     }
 
-    public function mapCluster001(Request $request) {
+    public function mapCluster001(Request $request)
+    {
         $responder = new ResponderController;
         $selectColumn = ['properties.id', 'pro_title', 'pro_lat', 'pro_lng', 'res_title'];
-        $selectColumn = "'" . implode(",", $selectColumn) . "'";
+        $selectColumn = "'".implode(',', $selectColumn)."'";
         try {
             $returnResult = $this->showNearByProperty($request, $selectColumn);
+
             return $responder->returnMessage(1, null, '', $returnResult);
         } catch (\Illuminate\Database\QueryException $e) {
             return $responder->returnMessage(0, 'Property', 1);
@@ -677,46 +688,50 @@ class PropertyController extends Controller {
     }
 
     /**
-     * Get feature of trending property
-     * @param  
+     * Get feature of trending property.
+     * @param
      * @return list of property with the last most view
      *///localhost/lumenapi/api/featured
-    private function showFeatured($request, $selectColumns) {
+
+    private function showFeatured($request, $selectColumns)
+    {
         $lat = $request->input('lat');
         $lng = $request->input('lng');
-        $arraySelectColumn = implode(",", $selectColumns);
+        $arraySelectColumn = implode(',', $selectColumns);
 //        $featureProperties = Trendings::getTrendingId(self::$number_per_page, $selectColumns);
         //$featureProperties = Trendings::getTrendingIdWithDistance(self::$number_per_page);
         //$propertyList = Properties::getPropertyDistanceByCurrenctLocation($lat, $lng, $arraySelectColumn, $featureProperties)->toArray();
         $properties = Properties::select('properties.id')
-							 ->orderBy('pro_view_counter', 'DESC')
-							 ->paginate(self::$number_per_page)->toArray();
-		$propertyList = array();
+                             ->orderBy('pro_view_counter', 'DESC')
+                             ->paginate(self::$number_per_page)->toArray();
+        $propertyList = [];
         foreach ($properties['data'] as $property) {
             if ($property['id'] != null) {
-                array_push($propertyList,$property['id'] );
+                array_push($propertyList, $property['id']);
             }
         }
-        
-        $featureProperties = Properties::getLatestViewProperties($arraySelectColumn,$propertyList);
+
+        $featureProperties = Properties::getLatestViewProperties($arraySelectColumn, $propertyList);
 
         if (empty($featureProperties)) {
             return [];
         }
+
         return $featureProperties;
     }
 
     /**
-     * Get video of property
-     * @param  
+     * Get video of property.
+     * @param
      * @return list of property with the last most view
      */
-    private function showVideos($selectColumns) {
+    private function showVideos($selectColumns)
+    {
         array_push($selectColumns, 'pro_videos as video_id');
 
         $videos = Properties::select($selectColumns)
                         ->with('currency')
-                        ->where('pro_videos', "<>", "")
+                        ->where('pro_videos', '<>', '')
                         ->paginate(self::$number_per_page)->toArray();
 
         if (empty($videos)) {
@@ -727,11 +742,13 @@ class PropertyController extends Controller {
     }
 
     /**
-     * Get last update of property
-     * @param  
+     * Get last update of property.
+     * @param
      * @return list of property with the last most view
      *///localhost/lumenapi/api/featured
-    private function showLastUpdate($request, $selectColumns) {
+
+    private function showLastUpdate($request, $selectColumns)
+    {
         $lastUpdate = Properties::select('id')
                         ->orderBy('updated_at', 'desc')
                         ->paginate(self::$number_per_page)->toArray();
@@ -741,64 +758,66 @@ class PropertyController extends Controller {
         }
         $lat = $request->input('lat');
         $lng = $request->input('lng');
-        $arraySelectColumn = implode(",", $selectColumns);
+        $arraySelectColumn = implode(',', $selectColumns);
 
         $propertyList = Properties::getPropertyDistanceByCurrenctLocation($lat, $lng, $arraySelectColumn, $lastUpdateId)->toArray();
 
         if (empty($propertyList)) {
             return [];
         }
+
         return $propertyList;
     }
 
     /**
-     * Create new property with validation and authentication check
+     * Create new property with validation and authentication check.
      * @param  array  $data
      * @return \Illuminate\Contracts\Validation\Validator
      */
-    public function hosting(Request $request, Properties $properties) {
+    public function hosting(Request $request, Properties $properties)
+    {
         $user = Auth::user();
         $responder = new ResponderController;
         $validator = $this->hostingValidation($request);
         $getData = $request->all();
-        if ($validator->fails()):// check user input
-            return $this->getResponseData("0", $validator->errors()->first(), "");
+        if ($validator->fails()) : // check user input
+            return $this->getResponseData('0', $validator->errors()->first(), '');
         endif;
 
         $fileUploadLimited = $this->limitedFileUpload($request->file('photos'), 3, 15);
-        if (!$fileUploadLimited['status']) {
+        if (! $fileUploadLimited['status']) {
             return $fileUploadLimited['message'];
         }
 
-        if ($request->hasFile('plan')):
+        if ($request->hasFile('plan')) :
             $fileUploadLimited = $this->limitedFileUpload($request->file('plan'), 0, 5);
-            if (!$fileUploadLimited['status']) {
-                return $fileUploadLimited['message'];
-            }
+        if (! $fileUploadLimited['status']) {
+            return $fileUploadLimited['message'];
+        }
         endif;
 
-//========================upload video to Youtube server================
+        //========================upload video to Youtube server================
         if ($request->hasFile('video')) {
             $youtubeUpload = new YoutubeController();
             $videoUploaded = $youtubeUpload->youtubeVideoUpload($request, $request->input('pro_title'));
-            if (!$videoUploaded['status']) {
-                return $this->getResponseData('0', "Video upload Error", $videoUploaded['message']);
+            if (! $videoUploaded['status']) {
+                return $this->getResponseData('0', 'Video upload Error', $videoUploaded['message']);
             }
             $getVideoUploaded = $videoUploaded['data'];
             $getData['pro_videos'] = $getVideoUploaded->id;
         }
 
-///==================Do file upload and return the file name===============================
+        ///==================Do file upload and return the file name===============================
         try {
-            $photosName = $this->doFileUpload($request, 'photos', NULL, TRUE);
+            $photosName = $this->doFileUpload($request, 'photos', null, true);
             if ($request->hasFile('plan')) {
                 $planName = $this->doFileUpload($request, 'plan', self::$property_plan_path);
                 $getData['pro_plan'] = json_encode($planName);
             } else {
-                $getData['pro_plan'] = NULL;
+                $getData['pro_plan'] = null;
             }
         } catch (\Exception $e) {
-            return $this->getResponseData('0', "File upload Error", $e->getMessage());
+            return $this->getResponseData('0', 'File upload Error', $e->getMessage());
         }
 
         $getData['pro_thumbnail'] = $photosName['thumbnail'];
@@ -806,17 +825,17 @@ class PropertyController extends Controller {
         $getData['pro_photos'] = json_encode($photosName['photos']);
         $getData['pro_use_id'] = $user->id;
 
-        if ($request->has('pro_residence') && $getData['pro_residence'] == 11):// Land for sale or rend
+        if ($request->has('pro_residence') && $getData['pro_residence'] == 11) : // Land for sale or rend
             $getData['pro_price'] = $getData['unite_price'] * $getData['pro_square_feet'];
         endif;
 
-//=================residence + property type + price==============================
+        //=================residence + property type + price==============================
 //        $residence = Residence::find($request->input('pro_residence'))->first();
 //        $propertyType = \App\PropertyType::find($request->input('pro_search_type'))->first();
 //        $pro_title = $residence->res_title . $propertyType->title . " $" . $getData['pro_price'];
 //        $getData['pro_title'] = $pro_title;
-//===============================================================================
-//dd($getData);
+        //===============================================================================
+        //dd($getData);
         try {
             $propertyList = $properties->create($getData);
             if ($request->input('pro_amenities')) {
@@ -830,12 +849,12 @@ class PropertyController extends Controller {
     }
 
     /**
-     * Create new property with validation and authentication check
+     * Create new property with validation and authentication check.
      * @param  array  $data
      * @return \Illuminate\Contracts\Validation\Validator
      */
-    public function hostingByWeb(Request $request) {
-
+    public function hostingByWeb(Request $request)
+    {
         $user = Auth::user();
         $responder = new ResponderController;
         $rules = [
@@ -855,57 +874,52 @@ class PropertyController extends Controller {
         ];
 
         if ($request->input('planUrls')) {
-            $rules ['planUrls'] = 'array|between:0,5';
+            $rules['planUrls'] = 'array|between:0,5';
         }
         $validator = Validator::make($request->all(), $rules, $this->setUserValidationMessage());
 
-        if ($validator->fails()):// check user input
-            return $this->getResponseData("0", $validator->errors()->first(), "");
+        if ($validator->fails()) : // check user input
+            return $this->getResponseData('0', $validator->errors()->first(), '');
         endif;
-
 
         $getData = $request->all();
 
-
-//========================upload video to Youtube server================
+        //========================upload video to Youtube server================
         if ($request->hasFile('video')) {
             $youtubeUpload = new YoutubeController();
             $videoUploaded = $youtubeUpload->youtubeVideoUpload($request, $request->input('pro_title'));
-            if (!$videoUploaded['status']) {
-                return $this->getResponseData('0', "Video upload Error", $videoUploaded['message']);
+            if (! $videoUploaded['status']) {
+                return $this->getResponseData('0', 'Video upload Error', $videoUploaded['message']);
             }
             $getVideoUploaded = $videoUploaded['data'];
             $getData['pro_videos'] = $getVideoUploaded->id;
         }
 
-///==================Do file upload and return the file name===============================
+        ///==================Do file upload and return the file name===============================
         try {
-            $photosName = $this->urlFilesUpload($request->input('photoUrls'), 'photos', NULL, TRUE);
+            $photosName = $this->urlFilesUpload($request->input('photoUrls'), 'photos', null, true);
             $getData['pro_photos'] = json_encode($photosName['photos']);
             $getData['pro_thumbnail'] = $photosName['thumbnail'];
-
 
             if ($request->has('planUrls')) {
                 $planName = $this->urlFilesUpload($request->input('planUrls'), 'plan', self::$property_plan_path);
                 $getData['pro_plan'] = json_encode($planName['plan']);
             } else {
-                $getData['pro_plan'] = NULL;
+                $getData['pro_plan'] = null;
             }
         } catch (\Exception $e) {
-            return $this->getResponseData('0', "File upload faild.", $e->getMessage());
+            return $this->getResponseData('0', 'File upload faild.', $e->getMessage());
         }
-
-
 
         $getData['pro_use_id'] = $user->id;
 
-//=================residence + property type + price==============================
+        //=================residence + property type + price==============================
         $residence = Residence::find($request->input('pro_residence'))->first();
         $propertyType = \App\PropertyType::find($request->input('pro_search_type'))->first();
-        $pro_title = $residence->res_title . " for " . $propertyType->title . " $" . $getData['pro_price'];
+        $pro_title = $residence->res_title.' for '.$propertyType->title.' $'.$getData['pro_price'];
         $getData['pro_title'] = $pro_title;
-//===============================================================================
-//        
+        //===============================================================================
+//
         try {
             $propertyList = Properties::create($getData);
             if ($request->input('pro_amenities')) {
@@ -924,7 +938,8 @@ class PropertyController extends Controller {
      * @param  array  $request
      * @return \Illuminate\Contracts\Validation\Validator
      */
-    public function hostingValidation($request) {
+    public function hostingValidation($request)
+    {
         $rules = [
 //            'pro_title' => 'min:5|regex:/(^[A-Za-z0-9 ]+$)+/',
             'pro_price' => 'required|numeric|digits_between:1,11',
@@ -939,7 +954,7 @@ class PropertyController extends Controller {
             'pro_status' => 'numeric',
             'pro_zip' => 'alpha_num',
             'pro_age' => 'numeric|max:100',
-            'videos' => 'mimes:mp4,mov,ogg,qt | max:200000'
+            'videos' => 'mimes:mp4,mov,ogg,qt | max:200000',
         ];
 
         $rules = $this->photoValidation($rules, $request);
@@ -947,64 +962,72 @@ class PropertyController extends Controller {
         if ($request->hasFile('plan')) {
             $rules = $this->planValidation($rules, $request);
         }
+
         return Validator::make($request->all(), $rules, $this->setUserValidationMessage());
     }
 
     /**
-     * List error message support multi language 
-     * @return array list of error message for each input 
+     * List error message support multi language.
+     * @return array list of error message for each input
      */
-    public function setUserValidationMessage() {
+    public function setUserValidationMessage()
+    {
         $errorMessage = [
             'username.required' => 'A user name is required',
             'username.min' => 'The username must be at least 5 characters',
-            'password.required' => 'A user password is required'
+            'password.required' => 'A user password is required',
         ];
+
         return $errorMessage;
     }
 
     /**
-     * Function to check multi file upload
+     * Function to check multi file upload.
      * @param  array $staticRules list input to validate
      * @param  array $data requested data
      * @param  string $strFileName input name that concent the file
      * @return array List of file name from generate number and time
      */
-    public function photoValidation($staticRules, $data) {
-
+    public function photoValidation($staticRules, $data)
+    {
         $nbr = count($data->file('photos'));
-        foreach (range(0, $nbr - 1) as $index):
-            $staticRules['photos' . '.' . $index] = 'image|mimes:jpeg,png,jpg,gif,pdf,tiff,svg,ai,psd,heic'; //it's size is smaller or equal to 5120 kb
+        foreach (range(0, $nbr - 1) as $index) :
+            $staticRules['photos'.'.'.$index] = 'image|mimes:jpeg,png,jpg,gif,pdf,tiff,svg,ai,psd,heic'; //it's size is smaller or equal to 5120 kb
         endforeach;
+
         return $staticRules;
     }
 
     /**
-     * Function to check multi file upload
+     * Function to check multi file upload.
      * @param  array $staticRules list input to validate
      * @param  array $data requested data
      * @param  string $strFileName input name that concent the file
      * @return array List of file name from generate number and time
      */
-    public function planValidation($staticRules, $data) {
+    public function planValidation($staticRules, $data)
+    {
         $nbr = count($data->file('plan'));
-        foreach (range(0, $nbr - 1) as $index):
-            $staticRules['plan' . '.' . $index] = 'image|mimes:jpeg,png,jpg,gif,pdf,tiff,svg,ai,psd,heic'; //it's size is smaller or equal to 5120 kb
+        foreach (range(0, $nbr - 1) as $index) :
+            $staticRules['plan'.'.'.$index] = 'image|mimes:jpeg,png,jpg,gif,pdf,tiff,svg,ai,psd,heic'; //it's size is smaller or equal to 5120 kb
         endforeach;
+
         return $staticRules;
     }
 
-    public function planUrlsValidation($staticRules, $data) {
+    public function planUrlsValidation($staticRules, $data)
+    {
         $nbr = count($data->file('plan'));
-        foreach (range(0, $nbr - 1) as $index):
-            $staticRules['plan' . '.' . $index] = 'image|mimes:jpeg,png,jpg,gif,pdf,tiff,svg,ai,psd,heic'; //it's size is smaller or equal to 5120 kb
+        foreach (range(0, $nbr - 1) as $index) :
+            $staticRules['plan'.'.'.$index] = 'image|mimes:jpeg,png,jpg,gif,pdf,tiff,svg,ai,psd,heic'; //it's size is smaller or equal to 5120 kb
         endforeach;
+
         return $staticRules;
     }
 
-    public function addAmenities(Properties $property, $amenity_id_array) {
-
-        if (!is_array($amenity_id_array)) {
+    public function addAmenities(Properties $property, $amenity_id_array)
+    {
+        if (! is_array($amenity_id_array)) {
             return false;
         }
 
@@ -1013,24 +1036,28 @@ class PropertyController extends Controller {
         return true;
     }
 
-    public function updateAmenities(Properties $property, $request) {
+    public function updateAmenities(Properties $property, $request)
+    {
         return $property->amenities()->sync($request);
     }
 
-    public function getArrayForInput($feild) {
-        $explode = str_replace('[', "", preg_split("[,]", $feild));
-        return str_replace(']', "", $explode);
+    public function getArrayForInput($feild)
+    {
+        $explode = str_replace('[', '', preg_split('[,]', $feild));
+
+        return str_replace(']', '', $explode);
     }
 
-    public function update(Request $request, $propertyId) {
+    public function update(Request $request, $propertyId)
+    {
         $property = Properties::find($propertyId)->first();
         $responder = new ResponderController;
-        if ($property == NULL) {
+        if ($property == null) {
             return $responder->returnMessage(0, 'Property', 5);
         }
 
-        if (!$request->all()) {
-            return $responder->returnMessage(0, null, null, '', "Nothing to update.");
+        if (! $request->all()) {
+            return $responder->returnMessage(0, null, null, '', 'Nothing to update.');
         }
 
         $validator = $this->requestValidator($request);
@@ -1049,10 +1076,11 @@ class PropertyController extends Controller {
      * @return
      */
 
-    public function updateVideo($id, Request $request) {
+    public function updateVideo($id, Request $request)
+    {
         $property = Properties::find($id);
         $responder = new ResponderController;
-        if (!$property) {
+        if (! $property) {
             return $responder->returnMessage(0, 'Property', 5);
         }
         $validator = Validator::make($request->all(), ['video' => 'required']);
@@ -1061,20 +1089,19 @@ class PropertyController extends Controller {
             return $responder->returnMessage(0, null, null, [], $validator->errors()->first());
         }
 
-//===============Check existing video ===============================
+        //===============Check existing video ===============================
         $youtubeUpload = new YoutubeController();
-        if ($property->pro_videos == NULL):  /// Don't have video, upload a new one
-            $videoUploaded = $youtubeUpload->youtubeVideoUpload($request, $request->input('video'), $request->input('pro_title'));
-        else:
+        if ($property->pro_videos == null) : /// Don't have video, upload a new one
+            $videoUploaded = $youtubeUpload->youtubeVideoUpload($request, $request->input('video'), $request->input('pro_title')); else :
             // Remove and update video on Youtube server
             $videoUploaded = $youtubeUpload->youtubeVideoUpdate($request, $request->file('video'), $property->pro_videos);
 
         endif;
-        if (!$videoUploaded['status']) {
-            return $this->getResponseData('0', "Video upload failed. ", $videoUploaded['message']);
+        if (! $videoUploaded['status']) {
+            return $this->getResponseData('0', 'Video upload failed. ', $videoUploaded['message']);
         }
         $getVideoUploaded = $videoUploaded['data'];
-        if (!$property->update(['pro_videos' => $getVideoUploaded->id])):
+        if (! $property->update(['pro_videos' => $getVideoUploaded->id])) :
             return $responder->returnMessage(0, 'Property', 1);
         endif;
 
@@ -1082,15 +1109,15 @@ class PropertyController extends Controller {
     }
 
     /**
-     * 
      * @param type $id
      * @param Request $request
      * @return type
      */
-    public function deleteVideo($id, Request $request) {
+    public function deleteVideo($id, Request $request)
+    {
         $property = Properties::find($id);
         $responder = new ResponderController;
-        if (!$property) {
+        if (! $property) {
             return $responder->returnMessage(0, 'Property', 5);
         }
         $validator = Validator::make($request->all(), ['video' => 'required']);
@@ -1099,31 +1126,31 @@ class PropertyController extends Controller {
             return $responder->returnMessage(0, null, null, '', $validator->errors()->first());
         }
 
-//===============Check existing video ===============================
+        //===============Check existing video ===============================
         $youtubeUpload = new YoutubeController();
         // Remove and update video on Youtube server
         $videoUploaded = $youtubeUpload->youtubeVideoDelete($request, $request->input('video'));
 
-
-        if (!$videoUploaded['status']) {
+        if (! $videoUploaded['status']) {
             return $this->getResponseData('0', $videoUploaded['message'], '');
         }
-        if (!$property->update(['pro_videos' => ''])):
+        if (! $property->update(['pro_videos' => ''])) :
             return $responder->returnMessage(0, 'Property', 1);
         endif;
 
         return $responder->returnMessage(1, 'Property', 2, $property->fresh());
     }
 
-    public function updateByWeb(Request $request, $propertyId) {
+    public function updateByWeb(Request $request, $propertyId)
+    {
         $property = Properties::find($propertyId);
         $responder = new ResponderController;
 
-        if ($property == NULL) {
+        if ($property == null) {
             return $responder->returnMessage(0, 'Property', 5);
         }
-        if (!$request->all()) {
-            return $responder->returnMessage(0, null, null, '', "Nothing to update.");
+        if (! $request->all()) {
+            return $responder->returnMessage(0, null, null, '', 'Nothing to update.');
         }
         $validator = $this->requestValidatorByWeb($request);
         if ($validator->fails()) {
@@ -1131,45 +1158,44 @@ class PropertyController extends Controller {
         }
 
         //================Update property amenities=======================
-        if ($request->has('pro_amenities')):
+        if ($request->has('pro_amenities')) :
             $property->amenities()->sync($request->input('pro_amenities'));
         endif;
-        
-        if(!$request->has('pro_amenities')){
-			DB::table('amenity_property')->where('property_id', $propertyId)->delete();
-		}
-//===============================================================
-        if ($request->has('photoUrls')):
+
+        if (! $request->has('pro_amenities')) {
+            DB::table('amenity_property')->where('property_id', $propertyId)->delete();
+        }
+        //===============================================================
+        if ($request->has('photoUrls')) :
             $oldPhotos = json_decode($property->pro_photos);
 
-            $photoUpdate = $this->filterFileUploadWithUrl($request->input('photoUrls'), $oldPhotos, 'photos', self::$property_photos_path, TRUE);
+        $photoUpdate = $this->filterFileUploadWithUrl($request->input('photoUrls'), $oldPhotos, 'photos', self::$property_photos_path, true);
 
-            if (!is_array($photoUpdate)):
+        if (! is_array($photoUpdate)) :
                 return $photoUpdate;
-            endif;
+        endif;
 
-            if ($photoUpdate['thumbnail']):
+        if ($photoUpdate['thumbnail']) :
                 $property->pro_thumbnail = $photoUpdate['thumbnail'];
-            endif;
+        endif;
 
-            $property->pro_photos = json_encode($photoUpdate['photos']);
+        $property->pro_photos = json_encode($photoUpdate['photos']);
 
         endif;
 
-        if ($request->has('planUrls')):
+        if ($request->has('planUrls')) :
 
-            if (count($property->pro_plan) > 0):
+            if (count($property->pro_plan) > 0) :
                 $oldPlans = json_decode($property->pro_plan);
-                $planUpdate = $this->filterFileUploadWithUrl($request->input('planUrls'), $oldPlans, 'plan', self::$property_plan_path);
-                if (!is_array($planUpdate)):
+        $planUpdate = $this->filterFileUploadWithUrl($request->input('planUrls'), $oldPlans, 'plan', self::$property_plan_path);
+        if (! is_array($planUpdate)) :
                     return $planUpdate;
-                endif;
+        endif;
 
-                $property->pro_plan = json_encode($planUpdate['plan']);
-            else:
+        $property->pro_plan = json_encode($planUpdate['plan']); else :
                 $planName = $this->urlFilesUpload($request->input('planUrls'), 'plan', self::$property_plan_path);
-                $property->pro_plan = json_encode($planName['plan']);
-            endif;
+        $property->pro_plan = json_encode($planName['plan']);
+        endif;
 
         endif;
 
@@ -1177,20 +1203,19 @@ class PropertyController extends Controller {
 
 //===============Check existing video ===============================
             $youtubeUpload = new YoutubeController();
-            if ($property->pro_videos == NULL):  /// Don't have video, upload a new one
-                $videoUploaded = $youtubeUpload->youtubeVideoUpload($request, $request->file('video'), $request->input('pro_title'));
-            else:
+            if ($property->pro_videos == null) : /// Don't have video, upload a new one
+                $videoUploaded = $youtubeUpload->youtubeVideoUpload($request, $request->file('video'), $request->input('pro_title')); else :
                 // Remove and update video on Youtube server
                 $videoUploaded = $youtubeUpload->youtubeVideoUpdate($request, $request->file('video'), $property->pro_videos);
 
             endif;
-            if (!$videoUploaded['status']) {
-                return $this->getResponseData('0', "Video upload failed. ", $videoUploaded['message']);
+            if (! $videoUploaded['status']) {
+                return $this->getResponseData('0', 'Video upload failed. ', $videoUploaded['message']);
             }
             $getVideoUploaded = $videoUploaded['data'];
             $property->pro_videos = $getVideoUploaded->id;
         }
-        if (!$property->update($request->all())):
+        if (! $property->update($request->all())) :
             return $responder->returnMessage(0, 'Property', $property);
         endif;
 
@@ -1201,11 +1226,11 @@ class PropertyController extends Controller {
      * Update property search type and price
      */
 
-    public function updatePrice($id, Request $request) {
-
+    public function updatePrice($id, Request $request)
+    {
         $property = Properties::find($id);
         $responder = new ResponderController;
-        if (!$property) {
+        if (! $property) {
             return $responder->returnMessage(0, 'Property', 5);
         }
         $rules = [
@@ -1218,7 +1243,7 @@ class PropertyController extends Controller {
             return $responder->returnMessage(0, null, null, [], $validator->errors()->first());
         }
 
-        if (!$property->update($request->all())):
+        if (! $property->update($request->all())) :
             return $responder->returnMessage(0, 'Property', 1);
         endif;
 
@@ -1253,16 +1278,15 @@ class PropertyController extends Controller {
 //    }
 
     /**
-     * 
      * @param type $id
      * @param Request $request
      * @return type
      */
-    public function updateMoreInfo($id, Request $request) {
-
+    public function updateMoreInfo($id, Request $request)
+    {
         $property = Properties::find($id);
         $responder = new ResponderController;
-        if (!$property) {
+        if (! $property) {
             return $responder->returnMessage(0, 'Property', 5);
         }
 
@@ -1272,14 +1296,13 @@ class PropertyController extends Controller {
             'pro_detail' => 'max:2500',
         ];
 
-
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return $responder->returnMessage(0, null, null, [], $validator->errors()->first());
         }
 
-        if (!$property->update($request->all())):
+        if (! $property->update($request->all())) :
             return $responder->returnMessage(0, 'Property', $property);
         endif;
 
@@ -1287,16 +1310,15 @@ class PropertyController extends Controller {
     }
 
     /**
-     * 
      * @param type $id
      * @param Request $request
      * @return type
      */
-    public function updateSearchType($id, Request $request) {
-
+    public function updateSearchType($id, Request $request)
+    {
         $property = Properties::find($id);
         $responder = new ResponderController;
-        if (!$property) {
+        if (! $property) {
             return $responder->returnMessage(0, 'Property', 5);
         }
 
@@ -1306,14 +1328,13 @@ class PropertyController extends Controller {
             'pro_price' => 'required|numeric|digits_between:1,11',
         ];
 
-
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return $responder->returnMessage(0, null, null, [], $validator->errors()->first());
         }
 
-        if (!$property->update($request->all())):
+        if (! $property->update($request->all())) :
             return $responder->returnMessage(0, 'Property', $property);
         endif;
 
@@ -1321,16 +1342,16 @@ class PropertyController extends Controller {
     }
 
     /**
-     * For ios old UI
+     * For ios old UI.
      * @param type $id
      * @param Request $request
      * @return type
      */
-    public function updateMoreInfoIos($id, Request $request) {
-
+    public function updateMoreInfoIos($id, Request $request)
+    {
         $property = Properties::find($id);
         $responder = new ResponderController;
-        if (!$property) {
+        if (! $property) {
             return $responder->returnMessage(0, 'Property', 5);
         }
 
@@ -1346,7 +1367,7 @@ class PropertyController extends Controller {
             return $responder->returnMessage(0, null, null, [], $validator->errors()->first());
         }
 
-        if (!$property->update($request->all())):
+        if (! $property->update($request->all())) :
             return $responder->returnMessage(0, 'Property', 1);
         endif;
 
@@ -1357,10 +1378,11 @@ class PropertyController extends Controller {
      * Update property contact
      */
 
-    public function updateContact($id, Request $request) {
+    public function updateContact($id, Request $request)
+    {
         $property = Properties::find($id);
         $responder = new ResponderController;
-        if (!$property) {
+        if (! $property) {
             return $responder->returnMessage(0, 'Property', 5);
         }
 
@@ -1376,22 +1398,24 @@ class PropertyController extends Controller {
 
         $user = Auth::user();
         $user->fill($request->input());
-        if (!$user->save()):
+        if (! $user->save()) :
             return $responder->returnMessage(0, 'User', 1);
         endif;
+
         return $responder->returnMessage(1, 'User', 2, $property->fresh());
     }
 
     /*
      * Update property residenc and amenity
      * {{server-address}}property/update/amenity/{id}
-     * 
+     *
      */
 
-    public function updateResidenceAndAmenity($id, Request $request) {
+    public function updateResidenceAndAmenity($id, Request $request)
+    {
         $property = Properties::find($id);
         $responder = new ResponderController;
-        if (!$property) {
+        if (! $property) {
             return $responder->returnMessage(0, 'Property', 5);
         }
 
@@ -1405,15 +1429,15 @@ class PropertyController extends Controller {
             'project_name_id' => 'numeric|nullable|exists:project_name,id',
         ];
 
-        if ($request->has('pro_amenities')):
-            foreach ($request->input('pro_amenities') as $key => $val):
-                $rules['pro_amenities' . '.' . $key] = 'required|exists:amenities,id';
-            endforeach;
+        if ($request->has('pro_amenities')) :
+            foreach ($request->input('pro_amenities') as $key => $val) :
+                $rules['pro_amenities'.'.'.$key] = 'required|exists:amenities,id';
+        endforeach;
         endif;
 
-        if($request->input('pro_amenities') == null){
-			DB::table('amenity_property')->where('property_id', $id)->delete();
-		}
+        if ($request->input('pro_amenities') == null) {
+            DB::table('amenity_property')->where('property_id', $id)->delete();
+        }
 
         $validator = Validator::make($request->all(), $rules);
 
@@ -1421,13 +1445,13 @@ class PropertyController extends Controller {
             return $responder->returnMessage(0, null, null, [], $validator->errors()->first());
         }
 
-        if (!$property->update($request->all())):
+        if (! $property->update($request->all())) :
             return $responder->returnMessage(0, 'Property', $property);
         endif;
-        if ($request->has('pro_amenities')):
-            if (!$property->amenities()->sync($request->input('pro_amenities'))):
+        if ($request->has('pro_amenities')) :
+            if (! $property->amenities()->sync($request->input('pro_amenities'))) :
                 return $responder->returnMessage(0, 'Property', 1);
-            endif;
+        endif;
         endif;
 
         return $responder->returnMessage(1, 'Property', 2, $property->fresh());
@@ -1436,13 +1460,14 @@ class PropertyController extends Controller {
     /*
      * Update property location
      * {{server-address}}property/update/location/{id}
-     * 
+     *
      */
 
-    public function updateLocation($id, Request $request) {
+    public function updateLocation($id, Request $request)
+    {
         $property = Properties::find($id);
         $responder = new ResponderController;
-        if (!$property) {
+        if (! $property) {
             return $responder->returnMessage(0, 'Property', 5);
         }
 
@@ -1458,18 +1483,20 @@ class PropertyController extends Controller {
             return $responder->returnMessage(0, null, null, [], $validator->errors()->first());
         }
 
-        if (!$property->update($request->all())):
+        if (! $property->update($request->all())) :
             return $responder->returnMessage(0, 'Property', $property);
         endif;
+
         return $responder->returnMessage(1, 'Property', 2, $property->fresh());
     }
 
     /**
-     * Function to create rules for each form request
+     * Function to create rules for each form request.
      * @param  Request $request list input to validate
      * @return 5.5/Illuminate/Validation/Validator
      */
-    public function requestValidator(Request $request) {
+    public function requestValidator(Request $request)
+    {
         $rulesList = [
 //            'pro_title' => 'required|min:5|max:100',
 //            'pro_price' => 'required|numeric|min:10',
@@ -1490,7 +1517,7 @@ class PropertyController extends Controller {
             'pro_contact_name' => 'required|max:50',
             'pro_contact_number' => 'required|alpha_num|max:50',
             'pro_contact_email' => 'required|email',
-            'pro_age' => 'required|numeric'
+            'pro_age' => 'required|numeric',
         ];
         $rules = [];
         if ($request->has('pro_amenities')) {
@@ -1501,28 +1528,29 @@ class PropertyController extends Controller {
                 return $validation;
             }
 
-            foreach ($request->input('pro_amenities') as $key => $val):
-                $rules['pro_amenities' . '.' . $key] = 'max:2';
+            foreach ($request->input('pro_amenities') as $key => $val) :
+                $rules['pro_amenities'.'.'.$key] = 'max:2';
             endforeach;
 
             return Validator::make($request->all(), $rules);
         }
-
 
         foreach ($request->all() as $key => $value) {
             if (isset($rulesList[$key])) {
                 $rules[$key] = $rulesList[$key];
             }
         }
+
         return Validator::make($request->all(), $rules);
     }
 
     /**
-     * Function to create rules for each form request
+     * Function to create rules for each form request.
      * @param  Request $request list input to validate
      * @return 5.5/Illuminate/Validation/Validator
      */
-    public function requestValidatorByWeb(Request $request) {
+    public function requestValidatorByWeb(Request $request)
+    {
         $rulesList = [
             'pro_price' => 'required|numeric|digits_between:1,11',
             'pro_address' => 'max:500',
@@ -1556,8 +1584,8 @@ class PropertyController extends Controller {
                 return $validation;
             }
 
-            foreach ($request->input('pro_amenities') as $key => $val):
-                $rules['pro_amenities' . '.' . $key] = 'max:2';
+            foreach ($request->input('pro_amenities') as $key => $val) :
+                $rules['pro_amenities'.'.'.$key] = 'max:2';
             endforeach;
 
             return Validator::make($request->all(), $rules);
@@ -1568,49 +1596,50 @@ class PropertyController extends Controller {
                 $rules[$key] = $rulesList[$key];
             }
         }
+
         return Validator::make($request->all(), $rules);
     }
 
-    public function updatePlan(Request $request, $propertyId) {
+    public function updatePlan(Request $request, $propertyId)
+    {
         $responder = new ResponderController;
 //      ============Check property by id ================
         $propertyUpdate = Properties::find($propertyId);
-        if (!$propertyUpdate) {
+        if (! $propertyUpdate) {
             return $responder->returnMessage(0, 'Property', 5, []);
         }
-        $property = DB::table("properties")->where('id', $propertyId)->first();
+        $property = DB::table('properties')->where('id', $propertyId)->first();
 
-        if (!$property) {
+        if (! $property) {
             return $responder->returnMessage(0, 'Property', 5, []);
         }
 
 //      ====================Validation photos================
         $validator = $this->validatePhotos($request, 'plan');
-        if ($validator->fails()):
+        if ($validator->fails()) :
             return $responder->returnMessage(0, null, null, '', $validator->errors()->first());
         endif;
 
-
         $fileUploadLimited = $this->limitedFileUpload($request->file('plan'), 0, 5);
-        if (!$fileUploadLimited['status']) {
+        if (! $fileUploadLimited['status']) {
             return $fileUploadLimited['message'];
         }
-//============filter array and move file upload============================= 
+        //============filter array and move file upload=============================
         try {
-            $planName = "";
+            $planName = '';
             $oldArray = [];
-            if (!empty($property->pro_plan)) {
+            if (! empty($property->pro_plan)) {
                 $oldArray = json_decode($property->pro_plan);
             }
 
             $planUpdate = $this->filterFileUpload($request, $oldArray, 'plan', 'uploads/property_plan_images');
-            if (!is_array($planUpdate)):
+            if (! is_array($planUpdate)) :
                 return $planUpdate;
             endif;
             $getData['pro_plan'] = json_encode($planUpdate['plan']);
 
-
             $propertyUpdate->update($getData);
+
             return $responder->returnMessage(1, 'Property', 2, $propertyUpdate);
         } catch (Exception $ex) {
             return $responder->returnMessage(0, 'Property', null, $ex->getMessage());
@@ -1618,27 +1647,27 @@ class PropertyController extends Controller {
     }
 
     /**
-     * 
      * @param Request $request
      * @param type $propertyId
      * @return type
      */
-    public function getUpdateData() {
+    public function getUpdateData()
+    {
         $ageCategory = \App\AgeCategory::all();
-        if (empty($ageCategory)):
+        if (empty($ageCategory)) :
             return $this->getResponseData('0', trans('messages.data_not_found'), '');
         endif;
         $data['pro_age'] = $ageCategory;
 
         $propertyStatus = \App\PropertyStatus::all();
-        if (empty($propertyStatus)):
+        if (empty($propertyStatus)) :
             return $this->getResponseData('0', trans('messages.data_not_found'), '');
         endif;
 
         $data['pro_status'] = $propertyStatus;
 
         $propertyType = \App\PropertyType::all();
-        if (empty($propertyType)):
+        if (empty($propertyType)) :
             return $this->getResponseData('0', trans('messages.data_not_found'), '');
         endif;
 
@@ -1648,25 +1677,25 @@ class PropertyController extends Controller {
     }
 
     /**
-     * 
-     * @return Array List of Age category, property status, property search type, 
+     * @return array List of Age category, property status, property search type,
      */
-    public function getHostingData() {
+    public function getHostingData()
+    {
         $ageCategory = \App\AgeCategory::all();
-        if (empty($ageCategory)):
+        if (empty($ageCategory)) :
             return $this->getResponseData('0', trans('messages.data_not_found'), '');
         endif;
         $data['pro_age'] = $ageCategory;
 
         $propertyStatus = \App\PropertyStatus::all();
-        if (empty($propertyStatus)):
+        if (empty($propertyStatus)) :
             return $this->getResponseData('0', trans('messages.data_not_found'), '');
         endif;
 
         $data['pro_status'] = $propertyStatus;
 
         $propertyType = \App\PropertyType::all();
-        if (empty($propertyType)):
+        if (empty($propertyType)) :
             return $this->getResponseData('0', trans('messages.data_not_found'), '');
         endif;
 
@@ -1675,56 +1704,59 @@ class PropertyController extends Controller {
         return $this->getResponseData('1', '', $data);
     }
 
-    public function updatePhoto(Request $request, $propertyId) {
+    public function updatePhoto(Request $request, $propertyId)
+    {
         $responder = new ResponderController;
 //      ============Check property by id ================
         $propertyUpdate = Properties::find($propertyId);
-        if (!$propertyUpdate) {
+        if (! $propertyUpdate) {
             return $responder->returnMessage(0, 'Property', 5, []);
         }
-        $property = DB::table("properties")->where('id', $propertyId)->first();
+        $property = DB::table('properties')->where('id', $propertyId)->first();
 
-        if (!$property) {
+        if (! $property) {
             return $responder->returnMessage(0, 'Property', 5, []);
         }
 //      ====================Validation photos================
         $validator = $this->validatePhotos($request, 'photos');
-        if ($validator->fails()):
+        if ($validator->fails()) :
             return $responder->returnMessage(0, 'Property', 6, $validator->errors()->first());
         endif;
 
         $fileUploadLimited = $this->limitedFileUpload($request->file('photos'), 3, 15);
-        if (!$fileUploadLimited['status']) {
+        if (! $fileUploadLimited['status']) {
             return $fileUploadLimited['message'];
         }
 
-//============filter array and move file upload============================= 
+        //============filter array and move file upload=============================
         try {
             $oldArray = json_decode($property->pro_photos);
-            $photoUpdate = $this->filterFileUpload($request, $oldArray, 'photos', 'uploads/property_images', TRUE);
+            $photoUpdate = $this->filterFileUpload($request, $oldArray, 'photos', 'uploads/property_images', true);
 
-            if (!is_array($photoUpdate)):
+            if (! is_array($photoUpdate)) :
                 return $photoUpdate;
             endif;
-            if ($photoUpdate['thumbnail']):
+            if ($photoUpdate['thumbnail']) :
                 $getData['pro_thumbnail'] = $photoUpdate['thumbnail'];
             endif;
 //        ========================Update database =================================
             $getData['pro_photos'] = json_encode($photoUpdate['photos']);
 
-
             $propertyUpdate->update($getData);
+
             return $responder->returnMessage(1, 'Property', 2, $propertyUpdate);
         } catch (Exception $ex) {
             return $responder->returnMessage(0, 'Property', null, $ex->getMessage());
         }
     }
 
-    public function removeFile($fileName) {
-        if (file_exists($fileName)):
+    public function removeFile($fileName)
+    {
+        if (file_exists($fileName)) :
             return unlink($fileName);
         endif;
-        return FALSE;
+
+        return false;
     }
 
 //    public function destroy($filename) {
@@ -1735,64 +1767,65 @@ class PropertyController extends Controller {
 //        }
 //    }
 
-    public function validatePhotos(Request $request, $inputName = Null) {
+    public function validatePhotos(Request $request, $inputName = null)
+    {
         $limit_photos = count($request->file($inputName));
-        foreach (range(0, $limit_photos - 1) as $index):
-            $rules[$inputName . '.' . $index] = 'required|image|mimes:jpeg,png,jpg,gif,svg|max:5000'; //it's size is smaller or equal to 5120 kb
-            $rulesMessage [$inputName . '.' . $index . '.required'] = 'Please upload an ' . $inputName;
-            $rulesMessage [$inputName . '.' . $index . '.image'] = 'File ' . ($index + 1) . ' must be an image.';
-            $rulesMessage [$inputName . '.' . $index . '.mimes'] = 'Only jpeg,png,jpg,gif and svg images are allowed';
-            $rulesMessage [$inputName . '.' . $index . '.max'] = 'Sorry! Maximum allowed size for an image is 5MB';
+        foreach (range(0, $limit_photos - 1) as $index) :
+            $rules[$inputName.'.'.$index] = 'required|image|mimes:jpeg,png,jpg,gif,svg|max:5000'; //it's size is smaller or equal to 5120 kb
+        $rulesMessage[$inputName.'.'.$index.'.required'] = 'Please upload an '.$inputName;
+        $rulesMessage[$inputName.'.'.$index.'.image'] = 'File '.($index + 1).' must be an image.';
+        $rulesMessage[$inputName.'.'.$index.'.mimes'] = 'Only jpeg,png,jpg,gif and svg images are allowed';
+        $rulesMessage[$inputName.'.'.$index.'.max'] = 'Sorry! Maximum allowed size for an image is 5MB';
         endforeach;
 
         return Validator::make($request->all(), $rules, $rulesMessage);
     }
 
     /**
-     * 
      * @param Request $request
      * @param array $oldArray
-     * @param String $fieldName
+     * @param string $fieldName
      * @param type $path
      * @param type $thumbnail
      * @return type
      */
-    public function filterFileUpload(Request $request, Array $oldArray, $fieldName = null, $path, $thumbnail = null) {
+    public function filterFileUpload(Request $request, array $oldArray, $fieldName, $path, $thumbnail = null)
+    {
         $thumbNail = null;
         $photos = $request->all();
-		$photsArr = ksort($photos[$fieldName]);
+        $photsArr = ksort($photos[$fieldName]);
         foreach ($photos[$fieldName] as $key => $file) {
             $originalName = $file->getClientOriginalName(); //get upload file list
-            if (!in_array($originalName, $oldArray)) {
+            if (! in_array($originalName, $oldArray)) {
                 //============Upload thumbnail when user change the first image=====================
-                if ($key > 0):
+                if ($key > 0) :
                     $thumbnail = null;
                 endif;
 //              ======upload file============
                 $moveUploadFile = $this->updateFiles($file, $fieldName, $path, $thumbnail);
-                if (!is_array($moveUploadFile)) {
+                if (! is_array($moveUploadFile)) {
                     return $moveUploadFile;
                 }
                 $newList[$key] = $moveUploadFile[$fieldName][0];
 
                 //==========Check update property thumbnail===============
-                if ($thumbnail != null):
+                if ($thumbnail != null) :
                     $thumbNail = $moveUploadFile['thumbnail'];
                 endif;
 
 //                ========unlink file============
                 if (isset($oldArray[$key])) {
-                    $this->removeFile($path . $oldArray[$key]);
+                    $this->removeFile($path.$oldArray[$key]);
                 }
             } else {
                 $newList[$key] = $originalName;
             }
         }
-        return [$fieldName => $newList, 'thumbnail' => ($thumbNail != NULL) ? $thumbNail : null];
+
+        return [$fieldName => $newList, 'thumbnail' => ($thumbNail != null) ? $thumbNail : null];
     }
 
     /**
-     * 
      * @param type $urls
      * @param type $oldArray
      * @param type $fieldName
@@ -1800,148 +1833,153 @@ class PropertyController extends Controller {
      * @param type $thumbnail
      * @return type array name
      */
-    public function filterFileUploadWithUrl($urls, Array $oldArray, $fieldName = null, $path, $thumbnail = null) {
+    public function filterFileUploadWithUrl($urls, array $oldArray, $fieldName, $path, $thumbnail = null)
+    {
         $thumbNail = null;
         foreach ($urls as $key => $url) {
             $originalName = basename($url); //get upload file list
-            if (!in_array($originalName, $oldArray)) {
+            if (! in_array($originalName, $oldArray)) {
                 //============Upload thumbnail when user change the first image=====================
-                if ($key > 0):
+                if ($key > 0) :
                     $thumbnail = null;
                 endif;
 //              ======upload file============
                 $moveUploadFile = $this->updateFileByUrl($url, $fieldName, $path, $thumbnail);
-                if (!is_array($moveUploadFile)):
+                if (! is_array($moveUploadFile)) :
                     return $moveUploadFile;
                 endif;
 
                 //==========Check update property thumbnail===============
-                if ($thumbnail != null):
+                if ($thumbnail != null) :
                     $thumbNail = $moveUploadFile['thumbnail'];
                 endif;
-
 
                 $newList[$key] = $moveUploadFile[$fieldName][0];
 //                ========unlink file============
                 if (isset($oldArray[$key])) {
-                    $this->removeFile($path . $oldArray[$key]);
+                    $this->removeFile($path.$oldArray[$key]);
                 }
             } else {
                 $newList[$key] = $originalName;
             }
         }
 //        return $newList;
-        return [$fieldName => $newList, 'thumbnail' => ($thumbNail != NULL) ? $thumbNail : null];
+        return [$fieldName => $newList, 'thumbnail' => ($thumbNail != null) ? $thumbNail : null];
     }
 
     /**
-     * 
      * @param Request $request
      * @return Instance of Intervention\Image\Image;
-     * 
      */
-    public function uploadWatermark(Request $request) {
+    public function uploadWatermark(Request $request)
+    {
         $image = $request->file('photos');
-        $slug = "bgh-dsd";
+        $slug = 'bgh-dsd';
         $key = 0;
-        $fileName = "img-" . $slug . "-" . $key . "." . strtolower($image->getClientOriginalExtension());
+        $fileName = 'img-'.$slug.'-'.$key.'.'.strtolower($image->getClientOriginalExtension());
         $destinationPath = self::$property_photos_path;
 
-//Upload Images One After the Order into folder
+        //Upload Images One After the Order into folder
         $img = Image::make($image->getRealPath());
         $watermarkLogo = Image::make('uploads/logo_watermark.png');
         $watermarkUrl = Image::make('uploads/url_watermark.png');
 
-
-// resize the image to a height of 200 and constrain aspect ratio (auto width)
+        // resize the image to a height of 200 and constrain aspect ratio (auto width)
         $img->resize(639, 500, function ($constraint) {
             $constraint->aspectRatio();
         });
         $img->insert($watermarkLogo, 'top-left', 10, 10);
         $img->insert($watermarkUrl, 'bottom-center', 10, 10);
-        $result = $img->save($destinationPath . '/' . $fileName, 100);
-        if (!$result) {
-            return $this->getResponseData('0', 'File update load faild.', "");
+        $result = $img->save($destinationPath.'/'.$fileName, 100);
+        if (! $result) {
+            return $this->getResponseData('0', 'File update load faild.', '');
         }
-        return $this->getResponseData('1', 'File upload successfull.', "");
+
+        return $this->getResponseData('1', 'File upload successfull.', '');
     }
 
     /**
-     * Function to check multi file upload
+     * Function to check multi file upload.
      * @param  array $staticRules list input to validate
      * @param  array $data requested data
      * @param  string $strFileName input name that concent the file
      * @return array List of file name from generate number and time
      */
-    public function removeAndUploadFile($file, $path = NULL) {
+    public function removeAndUploadFile($file, $path = null)
+    {
         try {
             if ($file->getClientSize() > UploadedFile::getMaxFilesize()) {
-
-                return ['status' => FALSE, 'respond' => \Exception($file->getClientSize())];
+                return ['status' => false, 'respond' => \Exception($file->getClientSize())];
             }
             $fileName = $this->generateFileName($file);
 
-
             $file->move($path, $fileName);
 
-            return ['status' => True, 'respond' => $fileName];
+            return ['status' => true, 'respond' => $fileName];
         } catch (\Exception $e) {
-            return ['status' => False, 'respond' => $e->getMessage()];
+            return ['status' => false, 'respond' => $e->getMessage()];
         }
     }
 
-    public function softDelete($id) {
+    public function softDelete($id)
+    {
         $responder = new ResponderController;
         $property = Properties::find($id);
-        if (!$property) {
+        if (! $property) {
             return $responder->returnMessage(0, 'Property', 5);
         }
         $property->delete();
+
         return $responder->returnMessage(1, 'Property', 2, $property);
     }
 
     /**
-     * Generate message back to the request object
+     * Generate message back to the request object.
      * @param  string  $ObjectName
      * @return Status of request and massage from the request
      * @Example: 'Property successfully update', 'Property not update'
      */
-    public function returnMessage($ObjectName, $messageTypeId) {
+    public function returnMessage($ObjectName, $messageTypeId)
+    {
         $messageType = ['status', 'danger'];
-        $ms = [" Successfully Updated..!!", " Not Updated..!!"];
+        $ms = [' Successfully Updated..!!', ' Not Updated..!!'];
 
-        return $str = [$messageType[$messageTypeId], $ObjectName . " " . $ms[$messageTypeId]];
+        return $str = [$messageType[$messageTypeId], $ObjectName.' '.$ms[$messageTypeId]];
     }
 
     /**
-     * Check result true or fails request and return the message 
-     * @param  array  $Object​​ query request result 
-     * @param  String $objectName name of object to print out the message
-     * @return String massage about query  and massage from the request
+     * Check result true or fails request and return the message.
+     * @param  array  $Object​​ query request result
+     * @param  string $objectName name of object to print out the message
+     * @return string massage about query  and massage from the request
      */
-    public function returnResult($object, $objectName) {
+    public function returnResult($object, $objectName)
+    {
         if ($object) {
             $sms = $this->returnMessage($objectName, 0);
         } else {
             $sms = $this->returnMessage($objectName, 1);
         }
+
         return response()->json($sms, 201);
     }
 
     /**
-     * Video File Upload 
+     * Video File Upload.
      * @param  array user input data
-     * @return ​Instance of Intervention\Image\Image; 
-     * List of photos have been uploaded 
+     * @return ​Instance of Intervention\Image\Image;
+     * List of photos have been uploaded
      */
-    public function videoUpload(Request $request, $path = null) {
+    public function videoUpload(Request $request, $path = null)
+    {
         $file = $request->file('videos');
         try {
             if ($file->getClientSize() > UploadedFile::getMaxFilesize()) {
-                return FALSE;
+                return false;
             }
             $fileName = $this->generateFileName($file);
             $file->move($path, $fileName);
+
             return $fileName;
         } catch (Exception $e) {
             return $e;
@@ -1949,56 +1987,59 @@ class PropertyController extends Controller {
     }
 
     /**
-     * Multiple File Upload 
+     * Multiple File Upload.
      * @param  array user input data
-     * @return ​Instance of Intervention\Image\Image; 
-     * List of photos have been uploaded 
+     * @return ​Instance of Intervention\Image\Image;
+     * List of photos have been uploaded
      */
-    public function doFileUpload($request = null, $inputName = null, $path = null, $thumbnail = null) {
+    public function doFileUpload($request = null, $inputName = null, $path = null, $thumbnail = null)
+    {
         $files = $request->file($inputName);
         if ($path == null) {
             $path = self::$property_photos_path;
         }
         try {
-            $resize = array(
-                "width" => null,
-                "height" => 768
-            );
-            if ($thumbnail != null):
-                $arrayName['thumbnail'] = "";
-                $arrayName[$inputName] = array();
-                foreach ($files as $key => $file):
+            $resize = [
+                'width' => null,
+                'height' => 768,
+            ];
+            if ($thumbnail != null) :
+                $arrayName['thumbnail'] = '';
+            $arrayName[$inputName] = [];
+            foreach ($files as $key => $file) :
                     if ($file->getClientSize() > UploadedFile::getMaxFilesize()) {
                         throw new \Exception($file->getClientSize());
                     }
-                    $fileName = $this->generateFileName($file);
-//======================Upload resize image=============================
-                    $this->uploadResizeImage($file, $fileName, $path, $resize);
+            $fileName = $this->generateFileName($file);
+            //======================Upload resize image=============================
+            $this->uploadResizeImage($file, $fileName, $path, $resize);
 
-                    //===========Create thumbnail from the first image upload================================
-                    if ($key == 0):
+            //===========Create thumbnail from the first image upload================================
+            if ($key == 0) :
                         $this->uploadThumbnail($file, $fileName, $path);
-                        $arrayName['thumbnail'] = 'thumbnail-' . $fileName;
+            $arrayName['thumbnail'] = 'thumbnail-'.$fileName;
 
-                    endif;
-                    //==========================================================
-                    array_push($arrayName[$inputName], $fileName);
-                endforeach;
-                return $arrayName;
+            endif;
+            //==========================================================
+            array_push($arrayName[$inputName], $fileName);
+            endforeach;
+
+            return $arrayName;
             endif;
 
-            $arrayName = array();
-            foreach ($files as $key => $file):
+            $arrayName = [];
+            foreach ($files as $key => $file) :
                 if ($file->getClientSize() > UploadedFile::getMaxFilesize()) {
                     throw new \Exception($file->getClientSize());
                 }
 
-                $fileName = $this->generateFileName($file);
-//======================Upload resize image=============================
-                $this->uploadResizeImage($file, $fileName, $path, $resize);
+            $fileName = $this->generateFileName($file);
+            //======================Upload resize image=============================
+            $this->uploadResizeImage($file, $fileName, $path, $resize);
 
-                array_push($arrayName, $fileName);
+            array_push($arrayName, $fileName);
             endforeach;
+
             return $arrayName;
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
@@ -2009,99 +2050,101 @@ class PropertyController extends Controller {
      * Upload list image URL
      */
 
-    public function urlFilesUpload($urls = null, $inputName = null, $path = null, $thumbnail = null) {
+    public function urlFilesUpload($urls = null, $inputName = null, $path = null, $thumbnail = null)
+    {
         if ($path == null) {
             $path = self::$property_photos_path;
         }
         try {
-            $resize = array(
-                "width" => null,
-                "height" => 768
-            );
-            $arrayName[$inputName] = array();
-            foreach ($urls as $key => $url):
+            $resize = [
+                'width' => null,
+                'height' => 768,
+            ];
+            $arrayName[$inputName] = [];
+            foreach ($urls as $key => $url) :
 
-                $fileContentInfo = get_headers($url, TRUE);
+                $fileContentInfo = get_headers($url, true);
 
-                if (!isset($fileContentInfo['Content-Length'])):
-                    return $this->getResponseData('0', 'File upload faild. Find not found :' . $url, "");
-                endif;
-                $fileSize = $fileContentInfo['Content-Length'];
+            if (! isset($fileContentInfo['Content-Length'])) :
+                    return $this->getResponseData('0', 'File upload faild. Find not found :'.$url, '');
+            endif;
+            $fileSize = $fileContentInfo['Content-Length'];
 
-                if ($fileSize > UploadedFile::getMaxFilesize()) {
+            if ($fileSize > UploadedFile::getMaxFilesize()) {
 //                    throw new \Exception($fileSize);
-                    return $this->getResponseData('0', 'File upload size is not allow.:' . $url, "");
-                }
+                return $this->getResponseData('0', 'File upload size is not allow.:'.$url, '');
+            }
 
-                $file = pathinfo($url);
-                $fileName = base64_encode(microtime()) . '_findod_property.' . $file['extension'];
-//======================Upload resize image=============================
-                $this->uploadResizeImageByURL($url, $fileName, $path, $resize);
+            $file = pathinfo($url);
+            $fileName = base64_encode(microtime()).'_findod_property.'.$file['extension'];
+            //======================Upload resize image=============================
+            $this->uploadResizeImageByURL($url, $fileName, $path, $resize);
 
-                //===========Create thumbnail from the first image upload================================
-                if ($key == 0):
-                    $arrayName['thumbnail'] = "";
-                    if ($thumbnail != null):
+            //===========Create thumbnail from the first image upload================================
+            if ($key == 0) :
+                    $arrayName['thumbnail'] = '';
+            if ($thumbnail != null) :
                         $this->uploadThumbnail(null, $fileName, $path, $url);
-                        $arrayName['thumbnail'] = 'thumbnail-' . $fileName;
-                    endif;
+            $arrayName['thumbnail'] = 'thumbnail-'.$fileName;
+            endif;
 
-                endif;
-                //==========================================================
-                array_push($arrayName[$inputName], $fileName);
+            endif;
+            //==========================================================
+            array_push($arrayName[$inputName], $fileName);
             endforeach;
+
             return $arrayName;
 
-//=========================================================================
+            //=========================================================================
         } catch (\Exception $e) {
-            return $this->getResponseData('0', 'File upload faild. Find not found :' . $url, "");
+            return $this->getResponseData('0', 'File upload faild. Find not found :'.$url, '');
 //            throw new \Exception($e->getMessage());
         }
     }
 
     /**
-     * 
      * @param type $url
      * @param type $inputName
      * @param type $path
      * @param type $thumbnail
      * @return string
      */
-    public function updateFiles($file, $inputName = null, $path = null, $thumbnail = null) {
+    public function updateFiles($file, $inputName = null, $path = null, $thumbnail = null)
+    {
         if ($path == null) {
             $path = self::$property_photos_path;
         }
         try {
-            $resize = array(
-                "width" => null,
-                "height" => 768
-            );
-            $arrayName[$inputName] = array();
+            $resize = [
+                'width' => null,
+                'height' => 768,
+            ];
+            $arrayName[$inputName] = [];
 
             $fileSize = $file->getClientSize();
-///=================Check image size befor update===========================
+            ///=================Check image size befor update===========================
             if ($fileSize > UploadedFile::getMaxFilesize()) {
-                return $this->getResponseData('0', 'File upload size is not allow:' . $fileSize, "");
+                return $this->getResponseData('0', 'File upload size is not allow:'.$fileSize, '');
             }
             $fileExtension = ($file->guessExtension()) ? $file->guessExtension() : 'jpeg';
 
-            $fileName = base64_encode(microtime()) . '_findod_property.' . $fileExtension;
-//======================Upload resize image=============================
+            $fileName = base64_encode(microtime()).'_findod_property.'.$fileExtension;
+            //======================Upload resize image=============================
             $this->uploadResizeImage($file, $fileName, $path, $resize);
 
             //===========Create thumbnail from the first image upload================================
-            if ($thumbnail != null):
-                $arrayName['thumbnail'] = "";
-                $this->uploadThumbnail(null, $fileName, $path, $file);
-                $arrayName['thumbnail'] = 'thumbnail-' . $fileName;
+            if ($thumbnail != null) :
+                $arrayName['thumbnail'] = '';
+            $this->uploadThumbnail(null, $fileName, $path, $file);
+            $arrayName['thumbnail'] = 'thumbnail-'.$fileName;
             endif;
             //==========================================================
             array_push($arrayName[$inputName], $fileName);
 
             return $arrayName;
-//=========================================================================
+            //=========================================================================
         } catch (\Exception $e) {
-            return $this->getResponseData('0', 'File upload faild. Find not found :' . $file, "");
+            return $this->getResponseData('0', 'File upload faild. Find not found :'.$file, '');
         }
     }
 
@@ -2109,69 +2152,69 @@ class PropertyController extends Controller {
      * Upload list image URL
      */
 
-    public function updateFileByUrl($url = null, $inputName = null, $path = null, $thumbnail = null) {
+    public function updateFileByUrl($url = null, $inputName = null, $path = null, $thumbnail = null)
+    {
         if ($path == null) {
             $path = self::$property_photos_path;
         }
         try {
-            $resize = array(
-                "width" => null,
-                "height" => 768
-            );
-            $arrayName[$inputName] = array();
+            $resize = [
+                'width' => null,
+                'height' => 768,
+            ];
+            $arrayName[$inputName] = [];
 
-
-            $fileContentInfo = get_headers($url, TRUE);
-//==============Check reach URL of image====================================
-            if (!isset($fileContentInfo['Content-Length'])):
-                return $this->getResponseData('0', 'File upload faild. Find not found :' . $url, "");
+            $fileContentInfo = get_headers($url, true);
+            //==============Check reach URL of image====================================
+            if (! isset($fileContentInfo['Content-Length'])) :
+                return $this->getResponseData('0', 'File upload faild. Find not found :'.$url, '');
             endif;
             $fileSize = $fileContentInfo['Content-Length'];
-///=================Check image size befor update===========================
+            ///=================Check image size befor update===========================
             if ($fileSize > UploadedFile::getMaxFilesize()) {
-                return $this->getResponseData('0', 'File upload size is not allow.:' . $url, "");
+                return $this->getResponseData('0', 'File upload size is not allow.:'.$url, '');
             }
 
             $file = pathinfo($url);
-            $fileName = base64_encode(microtime()) . '_findod_property.' . $file['extension'];
-//======================Upload resize image=============================
+            $fileName = base64_encode(microtime()).'_findod_property.'.$file['extension'];
+            //======================Upload resize image=============================
             $this->uploadResizeImageByURL($url, $fileName, $path, $resize);
 
             //===========Create thumbnail from the first image upload================================
-            if ($thumbnail != null):
-                $arrayName['thumbnail'] = "";
-                $this->uploadThumbnail(null, $fileName, $path, $url);
-                $arrayName['thumbnail'] = 'thumbnail-' . $fileName;
+            if ($thumbnail != null) :
+                $arrayName['thumbnail'] = '';
+            $this->uploadThumbnail(null, $fileName, $path, $url);
+            $arrayName['thumbnail'] = 'thumbnail-'.$fileName;
             endif;
             //==========================================================
             array_push($arrayName[$inputName], $fileName);
 
             return $arrayName;
-//=========================================================================
+            //=========================================================================
         } catch (\Exception $e) {
-            return $this->getResponseData('0', 'File upload faild. Find not found :' . $url, "");
+            return $this->getResponseData('0', 'File upload faild. Find not found :'.$url, '');
         }
     }
 
     /**
-     * 
      * @param type $file
      * @param type $fileName
      * @param type $path
      * @param type $resize
      */
-    private function uploadResizeImage($file, $fileName, $path, $resize = NULL) {
-        if ($resize == null):
-            $resize = array(
-                "width" => null,
-                "height" => 768
-            );
+    private function uploadResizeImage($file, $fileName, $path, $resize = null)
+    {
+        if ($resize == null) :
+            $resize = [
+                'width' => null,
+                'height' => 768,
+            ];
         endif;
 //        if ($resize != null):
         $imgResize = Image::make($file->getRealPath());
         $getResize = $this->checkSize($resize);
 //        $resizeFileName = $getResize['str'] . '-' . $fileName;
-// resize the image to a height of 500 and constrain aspect ratio (auto width)
+        // resize the image to a height of 500 and constrain aspect ratio (auto width)
         $imgResize->resize($getResize['width'], $getResize['height'], function ($constraint) {
             $constraint->aspectRatio();
         });
@@ -2181,20 +2224,20 @@ class PropertyController extends Controller {
 
         $imgResize->insert($watermarkLogo, 'top-left', 10, 10);
         $imgResize->insert($watermarkUrl, 'bottom-center', 10, 10);
-        $imgResize->save($path . '/' . $fileName);
+        $imgResize->save($path.'/'.$fileName);
     }
 
-    private function uploadResizeImageByURL($imageURL, $fileName, $path) {
-
-        $resize = array(
-            "width" => null,
-            "height" => 768
-        );
+    private function uploadResizeImageByURL($imageURL, $fileName, $path)
+    {
+        $resize = [
+            'width' => null,
+            'height' => 768,
+        ];
 //        if ($resize != null):
         $imgResize = Image::make($imageURL);
         $getResize = $this->checkSize($resize);
-        $resizeFileName = $getResize['str'] . '-' . $fileName;
-// resize the image to a height of 500 and constrain aspect ratio (auto width)
+        $resizeFileName = $getResize['str'].'-'.$fileName;
+        // resize the image to a height of 500 and constrain aspect ratio (auto width)
         $imgResize->resize($getResize['width'], $getResize['height'], function ($constraint) {
             $constraint->aspectRatio();
         });
@@ -2204,7 +2247,7 @@ class PropertyController extends Controller {
 
         $imgResize->insert($watermarkLogo, 'top-left', 10, 10);
         $imgResize->insert($watermarkUrl, 'bottom-center', 10, 10);
-        $imgResize->save($path . '/' . $fileName);
+        $imgResize->save($path.'/'.$fileName);
 //        endif;
 //=========================raw file size upload================
 //        $img = Image::make($imageURL);
@@ -2219,290 +2262,302 @@ class PropertyController extends Controller {
     /*
      * return array width &  height
      *        string  $str string of width X height
-     *              
+     *
      */
 
-    private function checkSize($size) {
+    private function checkSize($size)
+    {
         $width = $height = null;
-        $str = "";
-        if (isset($size['width']) && $size['width'] > 0):
+        $str = '';
+        if (isset($size['width']) && $size['width'] > 0) :
             $width = $size['width'];
-            $str .= $width . "x";
+        $str .= $width.'x';
         endif;
-        if (isset($size['height']) && $size['height'] > 0):
+        if (isset($size['height']) && $size['height'] > 0) :
             $height = $size['height'];
-            $str .= $height;
+        $str .= $height;
         endif;
-        $data = array('str' => $str, 'width' => $width, 'height' => $height);
+        $data = ['str' => $str, 'width' => $width, 'height' => $height];
+
         return $data;
     }
 
-    private function uploadThumbnail($file, $fileName, $path, $url = NULL) {
-
-        if ($url != NULL):
-            $img = Image::make($url);
-        else:
+    private function uploadThumbnail($file, $fileName, $path, $url = null)
+    {
+        if ($url != null) :
+            $img = Image::make($url); else :
             $img = Image::make($file->getRealPath());
         endif;
 
-        // require resize the image to a height =426 and width= 639 constrain aspect ratio 
+        // require resize the image to a height =426 and width= 639 constrain aspect ratio
 
         $img->resize(null, 426, function ($constraint) {
             $constraint->aspectRatio();
         });
-        $thumbnailPath = $path . "/thumbnails";
-        $img->save($thumbnailPath . '/' . 'thumbnail-' . $fileName);
+        $thumbnailPath = $path.'/thumbnails';
+        $img->save($thumbnailPath.'/'.'thumbnail-'.$fileName);
     }
 
-    public function backendUploadAmenity(Request $request) {
+    public function backendUploadAmenity(Request $request)
+    {
         $responder = new ResponderController;
         $apiToken = $request->header('api-token');
-        if (!$apiToken) {
-            return $responder->returnMessage(0, null, null, "API Token is request.");
+        if (! $apiToken) {
+            return $responder->returnMessage(0, null, null, 'API Token is request.');
         }
         $user = \App\Users::where('api_token', $apiToken)
                         ->where('userol_id', self::$admin_role)->first();
-        if (!$user) {
-            return $responder->returnMessage(0, null, null, "Unauthorized Access. please check your API token with administrator.");
+        if (! $user) {
+            return $responder->returnMessage(0, null, null, 'Unauthorized Access. please check your API token with administrator.');
         }
 
         $validator = Validator::make($request->all(), [
 //                    'amenity' => 'required|image|dimensions:max_width=100,max_height=100|mimes:png,jpg,gif,svg,jpeg'
-                    'amenity' => 'required|image|mimes:png,jpg,gif,svg,jpeg'
+                    'amenity' => 'required|image|mimes:png,jpg,gif,svg,jpeg',
                         ]
         );
-        if ($validator->fails()):
+        if ($validator->fails()) :
             return $responder->returnMessage(0, 6, 6, $validator->errors()->first());
         endif;
         $doUploadFile = $this->amenityFileUpload($request->file('amenity'), self::$amenity_directory);
-        if (!$doUploadFile) {
+        if (! $doUploadFile) {
             return $responder->returnMessage(0, 6, 7, $doUploadFile);
         }
+
         return $responder->returnMessage(1, null, null, $doUploadFile);
     }
 
     /**
-     * 
      * @param Request $request
      * @return type
      */
-    public function backendUploadResidence(Request $request) {
+    public function backendUploadResidence(Request $request)
+    {
         $responder = new ResponderController;
         $apiToken = $request->header('api-token');
-        if (!$apiToken) {
-            return $responder->returnMessage(0, null, null, "API Token is request.");
+        if (! $apiToken) {
+            return $responder->returnMessage(0, null, null, 'API Token is request.');
         }
         $user = \App\Users::where('api_token', $apiToken)
                         ->where('userol_id', self::$admin_role)->first();
-        if (!$user) {
-            return $responder->returnMessage(0, null, null, "Unauthorized Access. please check your API token with administrator.");
+        if (! $user) {
+            return $responder->returnMessage(0, null, null, 'Unauthorized Access. please check your API token with administrator.');
         }
 
         $validator = Validator::make($request->all(), [
 //                    'residence' => 'required|image|dimensions:max_width=100,max_height=100|mimes:png,jpg,gif,svg,jpeg'
-                    'residence' => 'required|image|mimes:png,jpg,gif,svg,jpeg'
+                    'residence' => 'required|image|mimes:png,jpg,gif,svg,jpeg',
                         ]
         );
-        if ($validator->fails()):
+        if ($validator->fails()) :
             return $responder->returnMessage(0, null, null, '', $validator->errors()->first());
         endif;
 
         $doUploadFile = $this->amenityFileUpload($request->file('residence'), self::$residence_directory);
-        if (!$doUploadFile) {
+        if (! $doUploadFile) {
             return $responder->returnMessage(0, 6, 7, $doUploadFile);
         }
+
         return $responder->returnMessage(1, null, null, $doUploadFile);
     }
 
     /**
-     * 
      * @param Request $request
      * @return type
      */
-    public function backendUploadAdvertisement(Request $request) {
+    public function backendUploadAdvertisement(Request $request)
+    {
         $responder = new ResponderController;
         $apiToken = $request->header('api-token');
-        if (!$apiToken) {
-            return $responder->returnMessage(0, null, null, "API Token is request.");
+        if (! $apiToken) {
+            return $responder->returnMessage(0, null, null, 'API Token is request.');
         }
         $user = \App\Users::where('api_token', $apiToken)
                         ->where('userol_id', self::$admin_role)->first();
-        if (!$user) {
-            return $responder->returnMessage(0, null, null, "Unauthorized Access. please check your API token with administrator.");
+        if (! $user) {
+            return $responder->returnMessage(0, null, null, 'Unauthorized Access. please check your API token with administrator.');
         }
 
         $validator = Validator::make($request->all(), [
-                    'advertisement' => 'required|image|dimensions:min_width=100,min_height=100|mimes:png,jpg,gif,svg,jpeg']
+                    'advertisement' => 'required|image|dimensions:min_width=100,min_height=100|mimes:png,jpg,gif,svg,jpeg', ]
         );
-        if ($validator->fails()):
+        if ($validator->fails()) :
             return $responder->returnMessage(0, null, null, '', $validator->errors()->first());
         endif;
 
         $doUploadFile = $this->advertisementFileUpload($request->file('advertisement'), self::$advertisement_directory);
-        if (!$doUploadFile) {
+        if (! $doUploadFile) {
             return $responder->returnMessage(0, 6, 7, $doUploadFile);
         }
+
         return $responder->returnMessage(1, null, null, $doUploadFile);
     }
 
-    public function backendUploadPhotos(Request $request) {
+    public function backendUploadPhotos(Request $request)
+    {
         $responder = new ResponderController;
 
         $apiToken = $request->header('api-token');
-        if (!$apiToken) {
-            return $responder->returnMessage(0, null, null, "API Token is request.");
+        if (! $apiToken) {
+            return $responder->returnMessage(0, null, null, 'API Token is request.');
         }
         $user = \App\Users::where('api_token', $apiToken)
                 ->first();
-        if (!$user) {
-            return $responder->returnMessage(0, null, null, "Unauthorized Access. please check your API token with administrator.");
+        if (! $user) {
+            return $responder->returnMessage(0, null, null, 'Unauthorized Access. please check your API token with administrator.');
         }
 
         $validator = $this->validatePhotos($request, 'photos');
-        if ($validator->fails()):
+        if ($validator->fails()) :
             return $responder->returnMessage(0, 'Property', 6, $validator->errors()->first());
         endif;
         $fileUploadLimited = $this->limitedFileUpload($request->file('photos'), 3, 15);
-        if (!$fileUploadLimited['status']) {
+        if (! $fileUploadLimited['status']) {
             return $fileUploadLimited['message'];
         }
-        $doUploadFile = $this->doFileUpload($request, 'photos', self::$property_photos_path, TRUE);
-        if (!$doUploadFile) {
+        $doUploadFile = $this->doFileUpload($request, 'photos', self::$property_photos_path, true);
+        if (! $doUploadFile) {
             return $responder->returnMessage(0, 'Property', 6, $doUploadFile);
         }
+
         return $responder->returnMessage(1, 'Property', 2, $doUploadFile);
     }
 
-    public function backendUploadPlans(Request $request) {
+    public function backendUploadPlans(Request $request)
+    {
         $responder = new ResponderController;
         $apiToken = $request->header('api-token');
-        if (!$apiToken) {
-            return $responder->returnMessage(0, null, null, "API Token is request.");
+        if (! $apiToken) {
+            return $responder->returnMessage(0, null, null, 'API Token is request.');
         }
         $user = \App\Users::where('api_token', $apiToken)
                 ->first();
-        if (!$user) {
-            return $responder->returnMessage(0, null, null, "Unauthorized Access. please check your API token with administrator.");
+        if (! $user) {
+            return $responder->returnMessage(0, null, null, 'Unauthorized Access. please check your API token with administrator.');
         }
 
         $validator = $this->validatePhotos($request, 'plans');
-        if ($validator->fails()):
+        if ($validator->fails()) :
             return $responder->returnMessage(0, 'Property', 6, $validator->errors()->first());
         endif;
 
         $fileUploadLimited = $this->limitedFileUpload($request->file('plans'), 0, 5);
-        if (!$fileUploadLimited['status']) {
+        if (! $fileUploadLimited['status']) {
             return $fileUploadLimited['message'];
         }
 
         $doUploadFile = $this->doFileUpload($request, 'plans', self::$property_plan_path);
-        if (!$doUploadFile) {
+        if (! $doUploadFile) {
             return $responder->returnMessage(0, 'Property', 6, $doUploadFile);
         }
+
         return $responder->returnMessage(1, 'Property', 2, $doUploadFile);
     }
 
     /**
-     * 
      * @param type $files
      * @return array  ['status','message']
      */
-    public function limitedFileUpload($files, $min = NULL, $max = NULL) {
-
+    public function limitedFileUpload($files, $min = null, $max = null)
+    {
         $responder = new ResponderController;
         $counter = count($files);
         if (($counter >= $min && $counter <= $max)) {
-            return ['status' => TRUE];
+            return ['status' => true];
         }
-        return ['status' => FALSE, 'message' =>
-            $responder->returnMessage(0, NULL, NULL, '', trans('messages.fileLenght'))];
+
+        return ['status' => false, 'message' => $responder->returnMessage(0, null, null, '', trans('messages.fileLenght'))];
 
 //        $this->getResponseData("0", "Data validation failed.", "File lenght validation failed.")];
     }
 
     /**
-     * Generate file name  as random with date time
-     * @param  string $extension file extension 
+     * Generate file name  as random with date time.
+     * @param  string $extension file extension
      * @return ​string new file name with time and random number from 5-10000
      */
-    static function generateFileName($file) {
-//building the file name
-        $fileName = base64_encode(microtime()) . '_findod_property';
-        $fullFileName = "";
-        if (!is_null($file->guessExtension())) {
-            $fullFileName = $fileName . '.' . $file->guessExtension();
+    public static function generateFileName($file)
+    {
+        //building the file name
+        $fileName = base64_encode(microtime()).'_findod_property';
+        $fullFileName = '';
+        if (! is_null($file->guessExtension())) {
+            $fullFileName = $fileName.'.'.$file->guessExtension();
         } else {
-            $fullFileName = $fileName . '.jpeg';
+            $fullFileName = $fileName.'.jpeg';
         }
+
         return $fullFileName;
     }
 
     /**
-     * Get list of amenities from a give residence id
+     * Get list of amenities from a give residence id.
      * @param  int $id  id of the residence given when click a list of residence
      * @return ​array List of amenities
      */
-    public function getAmenities($id) {
+    public function getAmenities($id)
+    {
         $responder = new ResponderController;
         $getResidence = Residence::find($id);
-        if ($getResidence != null):
+        if ($getResidence != null) :
             $amenitiesList = $getResidence['res_amenities'];
-            $explode_id = array_map('intval', explode(',', $amenitiesList));
-            $amenities = \App\Amenities::whereIn('id', $explode_id)
+        $explode_id = array_map('intval', explode(',', $amenitiesList));
+        $amenities = \App\Amenities::whereIn('id', $explode_id)
                     ->get();
-            return $responder->returnMessage(1, NULL, NULL, $amenities);
-        else:
+
+        return $responder->returnMessage(1, null, null, $amenities); else :
             return $responder->returnMessage(0, 'Residence', 5);
         endif;
     }
 
     /**
-     * Get list of residences
-     * @param  
+     * Get list of residences.
+     * @param
      * @return ​array List of residence
      */
-    public function getResidence() {
+    public function getResidence()
+    {
         $responder = new ResponderController;
         $getResidence = Residence::where('status', 1)->orderBy('position')->get()->toArray();
-        if ($getResidence != null):
-            return $responder->returnMessage(1, NULL, NULL, $getResidence);
-        else:
+        if ($getResidence != null) :
+            return $responder->returnMessage(1, null, null, $getResidence); else :
             return $responder->returnMessage(0, 'Residence', 5);
         endif;
     }
 
     /**
-     * Get list of residences
-     * @param  
+     * Get list of residences.
+     * @param
      * @return ​array List of residence
      */
-    public function getResidenceByType() {
+    public function getResidenceByType()
+    {
         $responder = new ResponderController;
         $getResidence = \App\ResidenceType::with('residence')->get()->toArray();
-        if ($getResidence != null):
-            return $responder->returnMessage(1, NULL, NULL, $getResidence);
-        else:
+        if ($getResidence != null) :
+            return $responder->returnMessage(1, null, null, $getResidence); else :
             return $responder->returnMessage(0, 'Residence', 5);
         endif;
     }
 
     /**
-     * Set trending information when click view a property
-     * @param  $propertyId property to recode the trending 
+     * Set trending information when click view a property.
+     * @param  $propertyId property to recode the trending
      * @return ​
      */
-    private function setTrending($propertyId = null) {
+    private function setTrending($propertyId = null)
+    {
         $trending = new Trendings();
         $currentDate = \Illuminate\Support\Carbon::now()->format('Y-m-d');
         $udateTrending = $trending->where('tre_pro_id', $propertyId)
                 ->where('tre_date', $currentDate)
                 ->update(['tre_counter' => DB::raw('tre_counter+1')]);
 
-        if (!$udateTrending):
+        if (! $udateTrending) :
             $trending->tre_date = $currentDate;
-            $trending->tre_pro_id = $propertyId;
-            $trending->tre_counter = 1;
-            $trending->save();
+        $trending->tre_pro_id = $propertyId;
+        $trending->tre_counter = 1;
+        $trending->save();
         endif;
 
         //$results = DB::select("call proUpdateTrending($propertyId,CURDATE())"); // call to procedure database with two arguments
@@ -2510,17 +2565,18 @@ class PropertyController extends Controller {
     }
 
     /**
-     * Find property march with dynamic given field 
-     * @param  array  $request list of key and value proposal 
+     * Find property march with dynamic given field.
+     * @param  array  $request list of key and value proposal
      * @return array List of properties
      */
-    public function filter(Request $request, $sort = null) {
+    public function filter(Request $request, $sort = null)
+    {
         $properties = new Properties();
         $responder = new ResponderController;
 //        $returnResult = array();
 //        ================ Example ==================
-//// Search for a property column dynamic
-        $propertyColumn = array('residence', 'search_type', 'parking', 'status');
+        //// Search for a property column dynamic
+        $propertyColumn = ['residence', 'search_type', 'parking', 'status'];
         //'bed_rooms', 'bath_rooms','floor'
         $query = $properties->newQuery();
         $selectColumn = [
@@ -2545,36 +2601,35 @@ class PropertyController extends Controller {
             'favorites_count',
             'properties.created_at',
             'pro_thumbnail',
-            'project_name_id'
+            'project_name_id',
         ];
         $query->select('id');
 
         $validator = Validator::make($request->all(), ['current_lat' => 'required', 'current_lng' => 'required']);
-        if ($validator->fails()):// check user input
-            return $this->getResponseData("0", $validator->errors()->first(), "");
+        if ($validator->fails()) : // check user input
+            return $this->getResponseData('0', $validator->errors()->first(), '');
         endif;
 
-        foreach ($propertyColumn as $key):// Dynamic field search from user input
+        foreach ($propertyColumn as $key) : // Dynamic field search from user input
 
-            if ($request->has($key) && $request->input($key) != "" && $request->input($key) > 0):
-                $query->where('pro_' . $key, $request->input($key));
-            endif;
+            if ($request->has($key) && $request->input($key) != '' && $request->input($key) > 0) :
+                $query->where('pro_'.$key, $request->input($key));
+        endif;
         endforeach;
 
-        $FilterColumn = array('bed_rooms', 'bath_rooms','floor');
+        $FilterColumn = ['bed_rooms', 'bath_rooms', 'floor'];
 
-        foreach($FilterColumn as $key):
+        foreach ($FilterColumn as $key) :
 
-            if ($request->has($key) && $request->input($key) != "" && $request->input($key) > 0):
-                if($request->input($key) == '10+'):
-                $query->whereBetween('pro_' . $key, ['10', '99']);
-                else:
-                $query->where('pro_' . $key, $request->input($key));
-                endif;        
-            endif;
+            if ($request->has($key) && $request->input($key) != '' && $request->input($key) > 0) :
+                if ($request->input($key) == '10+') :
+                $query->whereBetween('pro_'.$key, ['10', '99']); else :
+                $query->where('pro_'.$key, $request->input($key));
+        endif;
+        endif;
         endforeach;
 
-        if ($request->has('age') && $request->input('age') != "") {
+        if ($request->has('age') && $request->input('age') != '') {
             if ($request->input('age') < 5) {
                 $query->where('pro_age', '<=', $request->input('age'));
             } else {
@@ -2583,26 +2638,24 @@ class PropertyController extends Controller {
         }
 
         //===================Search property by project name===================
-        if ($request->has('project_name_id') && $request->input('project_name_id') != "") {
+        if ($request->has('project_name_id') && $request->input('project_name_id') != '') {
             $query->where('project_name_id', $request->input('project_name_id'));
         }
 
-// Search for a property min & max price.
+        // Search for a property min & max price.
         if ($request->has('min-price') && $request->has('max-price')) {
             $min = $request->input('min-price');
             $max = $request->input('max-price');
-            if ($max > $min && $max > 0):
+            if ($max > $min && $max > 0) :
                 $query->whereBetween('pro_price', [$min, $max]);
             endif;
-            if ($max == $min && $max > 0):
+            if ($max == $min && $max > 0) :
                 $query->where('pro_price', $max);
             endif;
         }
 
-
-// Search for a property min & max square feet.
+        // Search for a property min & max square feet.
         if ($request->has('min_square_feet') && $request->has('max_square_feet')) {
-
             $min = $request->input('min_square_feet');
             $max = $request->input('max_square_feet');
             if ($max > $min && $max > 0) {
@@ -2610,20 +2663,20 @@ class PropertyController extends Controller {
             }
         }
 
-// Search amenitest selected by user
-        if ($request->has('amenities')):
+        // Search amenitest selected by user
+        if ($request->has('amenities')) :
             $getPropertyByAmenit = $properties->getPropertyByAmenities($request);
-            $query->whereIn('properties.id', $getPropertyByAmenit);
+        $query->whereIn('properties.id', $getPropertyByAmenit);
 
         endif;
-        if ($request->has('user_role') && $request->input('user_role') != '' && $request->input('user_role') > 0):
-            $userList = \App\Users::where('userol_id',$request->input('user_role'))->get();
-            $ids = array();
-            foreach ($userList as $q) {
-                array_push($ids, $q->id);
-            }
-            $query->whereIn('pro_use_id', $ids);
-        
+        if ($request->has('user_role') && $request->input('user_role') != '' && $request->input('user_role') > 0) :
+            $userList = \App\Users::where('userol_id', $request->input('user_role'))->get();
+        $ids = [];
+        foreach ($userList as $q) {
+            array_push($ids, $q->id);
+        }
+        $query->whereIn('pro_use_id', $ids);
+
 //            $query->join('users', 'users.id', 'pro_use_id');
 //            $query->where('userol_id', $request->input('user_role'));
         endif;
@@ -2633,17 +2686,16 @@ class PropertyController extends Controller {
             $query->whereIn('properties.id', $ids);
         }
 
-// Search by polygon 
+        // Search by polygon
         if ($request->has('polygon')) {
-
-            $strPolygon = "'" . implode(",", $request->polygon) . ',' . $request->polygon[0] . "'";
+            $strPolygon = "'".implode(',', $request->polygon).','.$request->polygon[0]."'";
 
             $propertyList = Properties::getPropertyByPolygon($strPolygon, 'id');
             if (empty($propertyList)) {
-                return $responder->returnMessage(0, "Property", 1, []);
+                return $responder->returnMessage(0, 'Property', 1, []);
             }
-            $ids = array();
-//Extract the id's 
+            $ids = [];
+            //Extract the id's
             foreach ($propertyList as $q) {
                 array_push($ids, $q->id);
             }
@@ -2653,7 +2705,7 @@ class PropertyController extends Controller {
 
 //        ==================Sort data==========================
         $params = $request->query();
-        if (isset($params['sort'])):
+        if (isset($params['sort'])) :
 
             $sortParams = [
                 1 => ['created_at' => 'asc'],
@@ -2661,14 +2713,14 @@ class PropertyController extends Controller {
                 3 => ['pro_price' => 'asc'],
                 4 => ['pro_price' => 'desc'],
                 5 => ['pro_title' => 'asc'],
-                6 => ['pro_title' => 'desc']
+                6 => ['pro_title' => 'desc'],
             ];
-            if (array_key_exists($params['sort'], $sortParams)):
+        if (array_key_exists($params['sort'], $sortParams)) :
                 $sortBy = $sortParams[$params['sort']];
-                foreach ($sortBy as $key => $value):
-                    $query->orderBy('properties.' . $key, $value);
-                endforeach;
-            endif;
+        foreach ($sortBy as $key => $value) :
+                    $query->orderBy('properties.'.$key, $value);
+        endforeach;
+        endif;
         endif;
 //        ========================================================
 //        $query->paginate(self::$number_per_page);
@@ -2679,43 +2731,44 @@ class PropertyController extends Controller {
             foreach ($propertyList['data'] as $property) {
                 array_push($lastUpdateId, $property['id']);
             }
-            
+
             $lat = $request->input('current_lat');
             $lng = $request->input('current_lng');
             $distance = 10; //  10 km
-            $arraySelectColumn = implode(",", $selectColumn);
+            $arraySelectColumn = implode(',', $selectColumn);
             if ($request->has('polygon')) {
-				$propertyListWithDistance  = Properties::getPropertyDistanceByCurrenctLocation($lat, $lng, $arraySelectColumn, $lastUpdateId)->toArray();
-			}else{
-				 $propertyListWithDistance = Properties::getPropertyByCurrenctLocation($lat, $lng, $distance,$arraySelectColumn, $lastUpdateId)->toArray();
-			}
+                $propertyListWithDistance = Properties::getPropertyDistanceByCurrenctLocation($lat, $lng, $arraySelectColumn, $lastUpdateId)->toArray();
+            } else {
+                $propertyListWithDistance = Properties::getPropertyByCurrenctLocation($lat, $lng, $distance, $arraySelectColumn, $lastUpdateId)->toArray();
+            }
             //=============Keep user search histor========================
             $this->createSearchHistory($request, $propertyListWithDistance);
             //===========================================================
             if (empty($propertyListWithDistance)) {
-                return $responder->returnMessage(0, "Property", 5, []);
+                return $responder->returnMessage(0, 'Property', 5, []);
             }
 //            return $responder->returnMessage(1, NULL, 2, $this->generatePropertyList($propertyList));
-            return $responder->returnMessage(1, NULL, 2, $propertyListWithDistance);
+            return $responder->returnMessage(1, null, 2, $propertyListWithDistance);
         } catch (\Illuminate\Database\QueryException $e) {
             //=============Keep user search histor========================
             $this->createSearchHistory($request, $propertyList);
             //===========================================================
-            return $responder->returnMessage(0, "Property", 1, $e);
+            return $responder->returnMessage(0, 'Property', 1, $e);
         }
     }
 
     /**
-     * Find property march with dynamic given field 
-     * @param  array  $request list of key and value proposal 
+     * Find property march with dynamic given field.
+     * @param  array  $request list of key and value proposal
      * @return array List of properties
      */
-    public function filterByWeb(Request $request, $sort = null) {
+    public function filterByWeb(Request $request, $sort = null)
+    {
         $properties = new Properties();
         $responder = new ResponderController;
 //        ================ Example ==================
-//// Search for a property column dynamic
-        $propertyColumn = array('residence', 'bed_rooms', 'bath_rooms', 'search_type', 'parking', 'status', 'floor');
+        //// Search for a property column dynamic
+        $propertyColumn = ['residence', 'bed_rooms', 'bath_rooms', 'search_type', 'parking', 'status', 'floor'];
 
         $query = $properties->newQuery();
         $selectColumn = [
@@ -2739,18 +2792,18 @@ class PropertyController extends Controller {
             'pro_square_feet',
             'favorites_count',
             'properties.created_at',
-            'pro_thumbnail'
+            'pro_thumbnail',
         ];
         $query->select($selectColumn);
 
-        foreach ($propertyColumn as $key):// Dynamic field search from user input
+        foreach ($propertyColumn as $key) : // Dynamic field search from user input
 
-            if ($request->has($key) && $request->input($key) != "" && $request->input($key) > 0):
-                $query->where('pro_' . $key, $request->input($key));
-            endif;
+            if ($request->has($key) && $request->input($key) != '' && $request->input($key) > 0) :
+                $query->where('pro_'.$key, $request->input($key));
+        endif;
         endforeach;
 
-        if ($request->has('age') && $request->input('age') != "") {
+        if ($request->has('age') && $request->input('age') != '') {
             if ($request->input('age') < 5) {
                 $query->where('pro_age', '<=', $request->input('age'));
             } else {
@@ -2759,26 +2812,24 @@ class PropertyController extends Controller {
         }
 
         //===================Search property by project name===================
-        if ($request->has('project_name_id') && $request->input('project_name_id') != "") {
+        if ($request->has('project_name_id') && $request->input('project_name_id') != '') {
             $query->where('project_name_id', $request->input('project_name_id'));
         }
 
-// Search for a property min & max price.
+        // Search for a property min & max price.
         if ($request->has('min-price') && $request->has('max-price')) {
             $min = $request->input('min-price');
             $max = $request->input('max-price');
-            if ($max > $min && $max > 0):
+            if ($max > $min && $max > 0) :
                 $query->whereBetween('pro_price', [$min, $max]);
             endif;
-            if ($max == $min && $max > 0):
+            if ($max == $min && $max > 0) :
                 $query->where('pro_price', $max);
             endif;
         }
 
-
-// Search for a property min & max square feet.
+        // Search for a property min & max square feet.
         if ($request->has('min_square_feet') && $request->has('max_square_feet')) {
-
             $min = $request->input('min_square_feet');
             $max = $request->input('max_square_feet');
             if ($max > $min && $max > 0) {
@@ -2786,15 +2837,15 @@ class PropertyController extends Controller {
             }
         }
 
-// Search amenitest selected by user
-        if ($request->has('amenities')):
+        // Search amenitest selected by user
+        if ($request->has('amenities')) :
             $getPropertyByAmenit = $properties->getPropertyByAmenities($request);
-            $query->whereIn('properties.id', $getPropertyByAmenit);
+        $query->whereIn('properties.id', $getPropertyByAmenit);
 
         endif;
-        if ($request->has('user_role') && $request->input('user_role') != '' && $request->input('user_role') > 0):
+        if ($request->has('user_role') && $request->input('user_role') != '' && $request->input('user_role') > 0) :
             $query->join('users', 'users.id', 'pro_use_id');
-            $query->where('userol_id', $request->input('user_role'));
+        $query->where('userol_id', $request->input('user_role'));
         endif;
 
         if ($request->has('lat') && $request->input('lat') != '' && $request->has('lng') && $request->input('lng') != '') {
@@ -2802,17 +2853,16 @@ class PropertyController extends Controller {
             $query->whereIn('properties.id', $ids);
         }
 
-// Search by polygon 
+        // Search by polygon
         if ($request->has('polygon')) {
-
-            $strPolygon = "'" . implode(",", $request->polygon) . ',' . $request->polygon[0] . "'";
+            $strPolygon = "'".implode(',', $request->polygon).','.$request->polygon[0]."'";
 
             $propertyList = Properties::getPropertyByPolygon($strPolygon, 'id');
             if (empty($propertyList)) {
-                return $responder->returnMessage(0, "Property", 1, []);
+                return $responder->returnMessage(0, 'Property', 1, []);
             }
-            $ids = array();
-//Extract the id's 
+            $ids = [];
+            //Extract the id's
             foreach ($propertyList as $q) {
                 array_push($ids, $q->id);
             }
@@ -2823,27 +2873,27 @@ class PropertyController extends Controller {
 //        ==================Sort data==========================
         $params = $request->query();
 
-        if (isset($params['sort'])):
+        if (isset($params['sort'])) :
             $sortParams = [
                 'date_asc' => ['created_at' => 'asc'],
                 'date_desc' => ['created_at' => 'desc'],
                 'price_asc' => ['pro_price' => 'asc'],
                 'price_desc' => ['pro_price' => 'desc'],
                 'title_asc' => ['pro_title' => 'asc'],
-                'title_desc' => ['pro_title' => 'desc']
+                'title_desc' => ['pro_title' => 'desc'],
             ];
-            if (array_key_exists($params['sort'], $sortParams)):
+        if (array_key_exists($params['sort'], $sortParams)) :
                 $sortBy = $sortParams[$params['sort']];
-                foreach ($sortBy as $key => $value):
-                    $query->orderBy('properties.' . $key, $value);
-                endforeach;
-            endif;
+        foreach ($sortBy as $key => $value) :
+                    $query->orderBy('properties.'.$key, $value);
+        endforeach;
+        endif;
         endif;
 
 //        ========================================================
 //        $query->paginate(self::$number_per_page);
         $allProperty = [];
-        if (!isset($params['page'])):
+        if (! isset($params['page'])) :
             $allProperty = $query->get();
         endif;
 
@@ -2858,108 +2908,112 @@ class PropertyController extends Controller {
             $lat = $request->input('current_lat');
             $lng = $request->input('current_lng');
 
-            if (array_key_exists($params['sort'], $sortParams)):
+            if (array_key_exists($params['sort'], $sortParams)) :
                 $sortBy = $sortParams[$params['sort']];
-				$sort=[];
-				$data=[];
-                foreach ($sortBy as $key => $value):
-					$sort = $key;
-					$data = $value;
-                endforeach;
+            $sort = [];
+            $data = [];
+            foreach ($sortBy as $key => $value) :
+                    $sort = $key;
+            $data = $value;
+            endforeach;
             endif;
 
-            $arraySelectColumn = implode(",", $selectColumn);
-            $propertyListWithDistance = Properties::getPropertyDistanceByCurrenctLocationByWeb($lat, $lng, $arraySelectColumn, $lastUpdateId,$sort,$data)->toArray();
-
+            $arraySelectColumn = implode(',', $selectColumn);
+            $propertyListWithDistance = Properties::getPropertyDistanceByCurrenctLocationByWeb($lat, $lng, $arraySelectColumn, $lastUpdateId, $sort, $data)->toArray();
 
             //=============Keep user search histor========================
 //            $this->createSearchHistory($request, $propertyListWithDistance);
             //===========================================================
             if (empty($propertyListWithDistance)) {
-                return $responder->returnMessage(0, "Property", 5, []);
+                return $responder->returnMessage(0, 'Property', 5, []);
             }
-            return $responder->returnMessage(1, NULL, 2, ['property_list' => $propertyListWithDistance, 'property_by_map' => $allProperty]);
+
+            return $responder->returnMessage(1, null, 2, ['property_list' => $propertyListWithDistance, 'property_by_map' => $allProperty]);
         } catch (\Illuminate\Database\QueryException $e) {
             //=============Keep user search histor========================
             $this->createSearchHistory($request, $propertyList);
             //===========================================================
-            return $responder->returnMessage(0, "Property", 1, $propertyList);
+            return $responder->returnMessage(0, 'Property', 1, $propertyList);
         }
     }
 
-    public function filterLocation($request) {
+    public function filterLocation($request)
+    {
         $distance = 10; //Set defauld 10 km
         if ($request->has('distance')) {
             $distance = $request->input('distance');
         }
         $query = Properties::getByDistance($request->lat, $request->lng, $distance);
-        $ids = array();
+        $ids = [];
         if (empty($query)) {
             return $ids;
         }
-//Extract the id's
+        //Extract the id's
         foreach ($query as $q) {
             array_push($ids, $q->id);
         }
+
         return $ids;
     }
 
     /**
-     * Store all request from user when search property
-     * @param  array  $request list of key and value proposal 
-     * @return 
+     * Store all request from user when search property.
+     * @param  array  $request list of key and value proposal
+     * @return
      */
-    private function createSearchHistory(Request $request, $propertyList) {
+    private function createSearchHistory(Request $request, $propertyList)
+    {
         $searchHistory = new \App\SearchHistory();
         $user = Auth::user();
-        $searchHistory->user_id = (($user != null) ? $user->id : NULL);
+        $searchHistory->user_id = (($user != null) ? $user->id : null);
         $searchHistory->request_query = json_encode($request->except(['page', 'sort']));
         $searchHistory->request_result = json_encode($propertyList);
         $searchHistory->save();
     }
 
-    private function amenityFileUpload($file, $path) {
+    private function amenityFileUpload($file, $path)
+    {
         try {
-
             if ($file->getClientSize() > UploadedFile::getMaxFilesize()) {
                 throw new \Exception($file->getClientSize());
             }
-//building the file name
+            //building the file name
             $fullFileName = $this->generateFileName($file);
-//upload file the path 
-//please specify the protected $user_avatar_directory in this Controller in the top
+            //upload file the path
+            //please specify the protected $user_avatar_directory in this Controller in the top
             $file->move($path, $fullFileName);
 
             return $fullFileName;
         } catch (\Exception $e) {
-
             throw new \Exception($e->getMessage());
         }
     }
 
-    private function advertisementFileUpload($file, $path) {
+    private function advertisementFileUpload($file, $path)
+    {
         try {
-
             if ($file->getClientSize() > UploadedFile::getMaxFilesize()) {
                 throw new \Exception($file->getClientSize());
             }
-//building the file name
+            //building the file name
             $fullFileName = $this->generateFileName($file);
-//upload file the path 
+            //upload file the path
             $img = Image::make($file);
-// resize the image to a height of 430 and constrain aspect ratio (auto width)
+            // resize the image to a height of 430 and constrain aspect ratio (auto width)
 //            $img->resize(null, 470, function ($constraint){
 //                $constraint->aspectRatio();
 //            });
-            $img->save($path . '/' . $fullFileName, 100);
+            $img->save($path.'/'.$fullFileName, 100);
             $this->uploadThumbnail($file, $fullFileName, $path);
+
             return $fullFileName;
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
     }
 
-    public function insertFakProperties(Request $request) {
+    public function insertFakProperties(Request $request)
+    {
 //        use Faker\Factory as Faker;
         $faker = \Faker\Factory::create();
         $dir = self::$property_photos_path;
@@ -2980,22 +3034,22 @@ class PropertyController extends Controller {
                 'pro_photos' => json_encode([
                     $faker->image($dir, $width = 640, $height = 480, 'city', false),
                     $faker->image($dir, $width = 640, $height = 480, 'city', false),
-                    $faker->image($dir, $width = 640, $height = 480, 'city', false)
-                ])
+                    $faker->image($dir, $width = 640, $height = 480, 'city', false),
+                ]),
             ]);
         }
     }
 
-    public function urlUpload(Request $request) {
+    public function urlUpload(Request $request)
+    {
         $path = self::$test_photos_path;
         $imageUrl = $request->input('url');
         $fileName = basename($imageUrl);
         $img = Image::make($imageUrl);
-        $result = $img->save($path . '/' . $fileName);
-
+        $result = $img->save($path.'/'.$fileName);
 
 //      $result = $this->doFileUpload($request = null, $inputName = null, $path = null, $thumbnail = null);
-        dd("Success");
+        dd('Success');
     }
 
 //    public function urlUpload(Request $request) {

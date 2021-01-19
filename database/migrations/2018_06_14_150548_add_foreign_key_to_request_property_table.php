@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class AddForeignKeyToRequestPropertyTable extends Migration
 {
@@ -13,12 +13,11 @@ class AddForeignKeyToRequestPropertyTable extends Migration
      */
     public function up()
     {
-        
         Schema::table('request_property', function (Blueprint $table) {
             $table->integer('property_id')->unsigned()->change();
-             $table->integer('users_id')->unsigned()->change();
-             
-             $table->foreign('property_id')
+            $table->integer('users_id')->unsigned()->change();
+
+            $table->foreign('property_id')
                     ->references('id')->on('properties')
                     ->onDelete('cascade');
             $table->foreign('users_id')
@@ -35,7 +34,7 @@ class AddForeignKeyToRequestPropertyTable extends Migration
     public function down()
     {
         Schema::table('request_property', function (Blueprint $table) {
-        //    $table->dropForeign(['property_id', 'users_id']);
+            //    $table->dropForeign(['property_id', 'users_id']);
         });
     }
 }

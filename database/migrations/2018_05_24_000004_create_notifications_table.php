@@ -1,13 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateNotificationsTable extends Migration
 {
     /**
-     * Schema table name to migrate
+     * Schema table name to migrate.
      * @var string
      */
     public $set_schema_table = 'notifications';
@@ -20,7 +20,9 @@ class CreateNotificationsTable extends Migration
      */
     public function up()
     {
-        if (Schema::hasTable($this->set_schema_table)) return;
+        if (Schema::hasTable($this->set_schema_table)) {
+            return;
+        }
         Schema::create($this->set_schema_table, function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -32,11 +34,11 @@ class CreateNotificationsTable extends Migration
             $table->integer('properties_id')->nullable()->default(null);
             $table->tinyInteger('status')->default('0');
 
-            $table->index(["properties_id"], 'notifications_properties_id_foreign');
+            $table->index(['properties_id'], 'notifications_properties_id_foreign');
 
-            $table->index(["id"], 'notifications_id_index');
+            $table->index(['id'], 'notifications_id_index');
 
-            $table->index(["user_id"], 'notifications_user_id_foreign');
+            $table->index(['user_id'], 'notifications_user_id_foreign');
             $table->softDeletes();
             $table->nullableTimestamps();
         });
@@ -47,8 +49,8 @@ class CreateNotificationsTable extends Migration
      *
      * @return void
      */
-     public function down()
-     {
-       Schema::dropIfExists($this->set_schema_table);
-     }
+    public function down()
+    {
+        Schema::dropIfExists($this->set_schema_table);
+    }
 }

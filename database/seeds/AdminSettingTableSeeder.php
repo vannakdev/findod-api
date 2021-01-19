@@ -4,13 +4,13 @@ use Illuminate\Database\Seeder;
 
 class AdminSettingTableSeeder extends Seeder
 {
-   
     /**
      * Run the database seeds.
      *
      * @return void
      */
-    public function run() {
+    public function run()
+    {
         DB::table('admin_settings')->truncate();
 
         DB::table('admin_settings')->insert([
@@ -28,11 +28,8 @@ class AdminSettingTableSeeder extends Seeder
                 'linkedid_link' => 'https://www.linkedin.com/',
                 'google_link' => 'https://twitter.com',
                 'apple_store' => 'https://www.apple.com/',
-                'play_store' => 'https://play.google.com/store?hl=en'
-			]
+                'play_store' => 'https://play.google.com/store?hl=en',
+            ],
          ]);
     }
-
 }
-
-

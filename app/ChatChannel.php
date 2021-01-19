@@ -2,10 +2,10 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 use App\ChatContact;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class ChatChannel extends Model
 {
@@ -17,7 +17,7 @@ class ChatChannel extends Model
     protected $fillable = [
         'type',
         'user_id',
-        'property_id'
+        'property_id',
     ];
 
     /**
@@ -29,28 +29,28 @@ class ChatChannel extends Model
         'created_at',
         'updated_at',
         'deleted_at',
-        'message_deleted_at'
+        'message_deleted_at',
     ];
 
     protected $appends = [
         // 'partner',
         // 'property',
-        'last_message'
+        'last_message',
 
     ];
 
     protected $hidden = [
         'user_id',
-        'property_id'
+        'property_id',
     ];
 
     const TYPE = [
         'private'   => 'private',
         'public'    => 'public',
-        'group'     => 'group'
+        'group'     => 'group',
     ];
 
-    protected $message_flag = ['sent','seen'];
+    protected $message_flag = ['sent', 'seen'];
 
     public function participants()
     {
@@ -70,17 +70,17 @@ class ChatChannel extends Model
 
     public function partner()
     {
-        return $this->hasOne('App\ChatParticipant')->withTrashed()->where("user_id", "<>", Auth::id());
+        return $this->hasOne('App\ChatParticipant')->withTrashed()->where('user_id', '<>', Auth::id());
     }
 
     public function getLastMessageAttribute()
     {
         $message = \App\ChatMessage::where('chat_channel_id', $this->id)
                                    ->with('user')
-                                   ->orderBy('created_at', "DESC")
+                                   ->orderBy('created_at', 'DESC')
                                    ->first();
         if (is_null($message)) {
-            return "";
+            return '';
         } else {
             return $message;
         }
@@ -89,14 +89,15 @@ class ChatChannel extends Model
     public function getDeletedAtAttribute($value)
     {
         if (is_null($value)) {
-            return "";
+            return '';
         }
+
         return $value;
     }
 
     /**
-     * get the Allow Message Flag Enumeration $message_flag
-     * @return Array
+     * get the Allow Message Flag Enumeration $message_flag.
+     * @return array
      */
     public function getMessageFlag()
     {
@@ -109,10 +110,11 @@ class ChatChannel extends Model
              ->where('user_id', Auth::id())
              ->delete();
         $participant = $this->participants()->where('user_id', Auth::id())->first();
+
         return $participant->delete();
     }
 
-    public function restoreParticipants($all_participants =  true)
+    public function restoreParticipants($all_participants = true)
     {
         if ($all_participants) {
             return $this->participants()->restore();
@@ -122,19 +124,19 @@ class ChatChannel extends Model
     }
 
     /**
-     * Check whether the ChatChannel is exist in the Database or not
+     * Check whether the ChatChannel is exist in the Database or not.
      *
-     * @param  Integer $user_id, $property_id, $channel_id
+     * @param  int $user_id, $property_id, $channel_id
      *         (if $channel_id provided, $user_id and $property_id will be ignore)
-     * @return Boolean : True if Exist, False if not
+     * @return bool : True if Exist, False if not
      */
     public static function exist($user_id, $property_id, $channel_id = null)
     {
-        $count = 0 ;
+        $count = 0;
 
         if (is_null($channel_id)) {
             $count = self::where('user_id', $user_id)
-                         ->where("property_id", $property_id)->count();
+                         ->where('property_id', $property_id)->count();
         } else {
             $count = self::where('id', $channel_id)
                          ->count();
@@ -148,15 +150,15 @@ class ChatChannel extends Model
     }
 
     /**
-     * Check whether the user is exist the chat channel or not
+     * Check whether the user is exist the chat channel or not.
      *
-     * @param  Integer $user_id, Integer $channel_id
-     * @return Boolean : True if the user_id is allow, False if not
+     * @param  int $user_id, Integer $channel_id
+     * @return bool : True if the user_id is allow, False if not
      */
     public static function isParticipantAllow($user_id, $channel_id)
     {
-        $count =  0 ;
-        $count  = \App\ChatParticipant::where('user_id', $user_id)
+        $count = 0;
+        $count = \App\ChatParticipant::where('user_id', $user_id)
                                       ->where('chat_channel_id', $channel_id)
                                       ->count();
         if ($count > 0) {
@@ -174,7 +176,7 @@ class ChatChannel extends Model
                                                ->toArray();
 
         //Remove all the channel with no message
-        $channel_id_array = ChatMessage::whereIn("chat_channel_id", $channel_id_array)
+        $channel_id_array = ChatMessage::whereIn('chat_channel_id', $channel_id_array)
                                        ->distinct('chat_channel_id')
                                        ->pluck('chat_channel_id')
                                        ->toArray();
@@ -184,7 +186,8 @@ class ChatChannel extends Model
 
     public static function getUnreadMessageChannelIdsByUserID(int $user_id)
     {
-        $channel_id_array =  self::getChannelIdsByUserID($user_id);
+        $channel_id_array = self::getChannelIdsByUserID($user_id);
+
         return  ChatMessage::whereIn('chat_channel_id', $channel_id_array)
                                         ->where('flag', 'sent')
                                         ->where('user_id', '<>', $user_id)

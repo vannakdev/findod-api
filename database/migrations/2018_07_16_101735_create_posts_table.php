@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreatePostsTable extends Migration
 {
@@ -18,7 +18,7 @@ class CreatePostsTable extends Migration
             $table->unsignedInteger('user_id');
             $table->string('title', 500)->nullable(false);
             $table->string('slug', 500)->nullable(false);
-            $table->longText('content')->default("");
+            $table->longText('content')->default('');
             $table->enum('visibility', ['published', 'draft'])->default('draft');
             $table->boolean('protected')->default(false);
             $table->softDeletes();

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Global class for system notification
+ * Global class for system notification.
  *
  * @author OU Sophea : ODIC
  */
@@ -10,33 +10,34 @@ namespace App\Http\Controllers;
 
 use App\Properties;
 use App\RequestViewing;
-use Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Validator;
 
 /**
- * Description of newPHPClass
+ * Description of newPHPClass.
  *
  * @author OU Sophea : ODIC
  */
-class RequestViewingController extends Controller {
-
-    public function __construct() {
-        
+class RequestViewingController extends Controller
+{
+    public function __construct()
+    {
     }
 
-    public function create(Request $request) {
-         $user = Auth::user();
-         $validator = Validator::make($request->all(), [
+    public function create(Request $request)
+    {
+        $user = Auth::user();
+        $validator = Validator::make($request->all(), [
                     'property_id' => 'required|exists:properties,id,pro_active,1,deleted_at,NULL'
-                                   . '|unique:properties,id,null,pros_use_id,pro_use_id,'.$user->id,// when user try to request their hosting property
-                    'description' => 'required|max:250'
+                                   .'|unique:properties,id,null,pros_use_id,pro_use_id,'.$user->id, // when user try to request their hosting property
+                    'description' => 'required|max:250',
                         ], [
                     'property_id.exists' => 'Request property not found.',
-                     'property_id.unique' => 'You can not request view your hosting property.'
+                     'property_id.unique' => 'You can not request view your hosting property.',
         ]);
         if ($validator->fails()) {
-            return $this->getResponseData("0", $validator->errors()->first(),"");
+            return $this->getResponseData('0', $validator->errors()->first(), '');
         }
 
         $requestViewing = new RequestViewing();
@@ -44,8 +45,8 @@ class RequestViewingController extends Controller {
         $getRequestViewing = $requestViewing->where('property_id', $request->property_id)
                         ->where('users_id', $user->id)->first(); //check if user ready sending the review
 
-        if ($getRequestViewing != NULL) {// property ready request viewing
-            return $this->getResponseData("0", "You ready request viewing this property.", $getRequestViewing);
+        if ($getRequestViewing != null) {// property ready request viewing
+            return $this->getResponseData('0', 'You ready request viewing this property.', $getRequestViewing);
         }
 
         //================Record review request=======================
@@ -53,10 +54,9 @@ class RequestViewingController extends Controller {
         $requestViewing->users_id = $user->id;
         $requestViewing->description = $request->input('description');
 
-        if (!$requestViewing->save()) {
-            return $this->getResponseData("0", "Sending notification fails.", "");
+        if (! $requestViewing->save()) {
+            return $this->getResponseData('0', 'Sending notification fails.', '');
         }
-
 
         //==================================
 //        ==============Record notification===============
@@ -75,9 +75,6 @@ class RequestViewingController extends Controller {
 //        endif;
         //======================================================
 
-
-
-        return $this->getResponseData("1", "Sending notifiction successfully.", '');
+        return $this->getResponseData('1', 'Sending notifiction successfully.', '');
     }
-
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Global class for system notification
+ * Global class for system notification.
  *
  * @author OU Sophea : ODIC
  */

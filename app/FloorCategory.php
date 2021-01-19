@@ -6,8 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class FloorCategory extends Model
 {
-
-        protected $table = 'floor_category';
+    protected $table = 'floor_category';
     /**
      * The attributes that are mass assignable.
      *
@@ -26,7 +25,7 @@ class FloorCategory extends Model
      * @var array
      */
     protected $hidden = ['translation'];
-    protected $appends =['title'];
+    protected $appends = ['title'];
     //================Residence traislation ============================
     protected $with = ['translation'];
 
@@ -39,10 +38,13 @@ class FloorCategory extends Model
     {
         return $this->hasMany('App\FloorCategoryTranslation');
     }
-    public function getTitleAttribute(){
-       if ($this->translation->first()):
+
+    public function getTitleAttribute()
+    {
+        if ($this->translation->first()):
             return $this->translation->first()->title;
         endif;
+
         return '';
     }
 }

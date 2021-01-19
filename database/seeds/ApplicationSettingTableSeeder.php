@@ -4,7 +4,6 @@ use Illuminate\Database\Seeder;
 
 class ApplicatoinSettingTableSeeder extends Seeder
 {
-
     /**
      * Run the database seeds.
      *
@@ -18,11 +17,11 @@ class ApplicatoinSettingTableSeeder extends Seeder
         //     'title' => 'Mobile Application Show Case'
         // ]);
 
-        if ( !App\AppSetting::where('key', 'landing_page_youtube_video')->first() ){
+        if (! App\AppSetting::where('key', 'landing_page_youtube_video')->first()) {
             $setting = new App\AppSetting;
             $setting->key = 'landing_page_youtube_video';
-            $setting->data_type = "String";
-            $setting->value = "https://youtube/embed/video_id";
+            $setting->data_type = 'String';
+            $setting->value = 'https://youtube/embed/video_id';
             $setting->save();
         }
 
@@ -32,7 +31,7 @@ class ApplicatoinSettingTableSeeder extends Seeder
             'about_us' => 'Describe something about your Business ',
             'meta_keyword' => 'keyword for Search Engine Optimization ',
             'meta_description' => 'Tell about your Business  in more detail',
-            'phone_number' => "010866035",
+            'phone_number' => '010866035',
             'email_id' => 'email@business.example',
             'fav_icon' => '',
             'social_facebook_link' => 'https://facebook.com/#',
@@ -47,16 +46,16 @@ class ApplicatoinSettingTableSeeder extends Seeder
             'default_language_code' => 'en',
             'default_currency_code' => 'usd',
             'app_store_link'=> 'https://plus.google.com/#',
-            'play_store_link'=>'https://plus.google.com/#'
+            'play_store_link'=>'https://plus.google.com/#',
         ];
 
-        foreach( $settings AS $key => $value ){
-            if ( App\AppSetting::where('key', $key)->first() ){
+        foreach ($settings as $key => $value) {
+            if (App\AppSetting::where('key', $key)->first()) {
                 continue;
             }
             $setting = new App\AppSetting;
             $setting->key = $key;
-            $setting->data_type = "String";
+            $setting->data_type = 'String';
             $setting->value = $value;
             $setting->save();
         }

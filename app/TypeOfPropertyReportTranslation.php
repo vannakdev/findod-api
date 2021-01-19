@@ -4,8 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TypeOfPropertyReportTranslation extends Model {
-
+class TypeOfPropertyReportTranslation extends Model
+{
     /**
      * The attributes that are mass assignable.
      *
@@ -22,6 +22,5 @@ class TypeOfPropertyReportTranslation extends Model {
     protected $hidden = [
         'id',
         'created_at',
-        'updated_at'];
-
+        'updated_at', ];
 }

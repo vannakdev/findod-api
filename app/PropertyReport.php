@@ -2,10 +2,11 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
 use App\TypeOfPropertyReport;
-class PropertyReport extends Model {
+use Illuminate\Database\Eloquent\Model;
 
+class PropertyReport extends Model
+{
     /**
      * The attributes that are mass assignable.
      *
@@ -18,7 +19,7 @@ class PropertyReport extends Model {
         'type_of_property_report_id',
         'comment',
         'created_at',
-        'updated_at'
+        'updated_at',
     ];
 
     /**
@@ -28,15 +29,18 @@ class PropertyReport extends Model {
      */
     protected $hidden = [];
 
-    public function user() {
+    public function user()
+    {
         return $this->belongsTo('App\Users', 'user_id');
     }
 
-    public function property() {
-        return $this->belongsTo('App\Properties','property_id');
-    }
-    public function type_of_property_reports() {
-        return $this->belongsTo('App\TypeOfPropertyReport','type_of_property_report_id');
+    public function property()
+    {
+        return $this->belongsTo('App\Properties', 'property_id');
     }
 
+    public function type_of_property_reports()
+    {
+        return $this->belongsTo('App\TypeOfPropertyReport', 'type_of_property_report_id');
+    }
 }

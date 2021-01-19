@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateFloorCategoryTable extends Migration
 {
@@ -13,10 +13,11 @@ class CreateFloorCategoryTable extends Migration
      */
     public function up()
     {
-        if (Schema::hasTable('floor_category'))
-        return;
+        if (Schema::hasTable('floor_category')) {
+            return;
+        }
         Schema::create('floor_category', function (Blueprint $table) {
-            $table->engine = 'InnoDB'; 
+            $table->engine = 'InnoDB';
             $table->increments('id');
 
             $table->string('rule', 20)->nullable();

@@ -1,10 +1,11 @@
 <?php
 
 namespace App;
+
 use Illuminate\Database\Eloquent\Model;
 
-class Notification_type extends Model {
-
+class Notification_type extends Model
+{
     /**
      * The attributes that are mass assignable.
      *
@@ -13,7 +14,7 @@ class Notification_type extends Model {
     protected $table = 'notification_type';
     protected $fillable = [
         'title',
-        'content'
+        'content',
     ];
 
     /**
@@ -21,12 +22,10 @@ class Notification_type extends Model {
      *
      * @var array
      */
-    protected $hidden = ['id','created_at','updated_at'];
-    
+    protected $hidden = ['id', 'created_at', 'updated_at'];
 
 //    public function notification()
 //    {
 //        return $this->hasMany('App\Notification');
 //    }
-
 }

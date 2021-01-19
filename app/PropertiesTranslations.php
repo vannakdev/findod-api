@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\DB;
 //use App\Users;
 //use Illuminate\Support\Carbon;
 
-class PropertiesTranslations extends Model {
+class PropertiesTranslations extends Model
+{
 //    use SoftDeletes;
 
     /**
@@ -19,7 +20,7 @@ class PropertiesTranslations extends Model {
      *
      * @var array
      */
-    static protected $default_residence = 9;
+    protected static $default_residence = 9;
     protected $table = 'properties_translations';
 
     /**
@@ -30,7 +31,7 @@ class PropertiesTranslations extends Model {
     protected $fillable = [
         'pro_title',
         'locale',
-        'properties_id'
+        'properties_id',
     ];
 
     /**
@@ -38,10 +39,10 @@ class PropertiesTranslations extends Model {
      *
      * @var array
      */
-    protected $hidden = ['id', 'created_at', 'updated_at','properties_id','locale'];
+    protected $hidden = ['id', 'created_at', 'updated_at', 'properties_id', 'locale'];
 
-    public function Properties() {
-        return $this->belongsTo('App\Properties','properties_id');
+    public function Properties()
+    {
+        return $this->belongsTo('App\Properties', 'properties_id');
     }
-
 }

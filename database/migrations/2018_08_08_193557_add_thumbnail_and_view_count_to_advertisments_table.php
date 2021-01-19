@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class AddThumbnailAndViewCountToAdvertismentsTable extends Migration
 {
@@ -14,7 +14,7 @@ class AddThumbnailAndViewCountToAdvertismentsTable extends Migration
     public function up()
     {
         Schema::table('advertisements', function (Blueprint $table) {
-            $table->string('thumbnail',255)->nullable(false)->default('');
+            $table->string('thumbnail', 255)->nullable(false)->default('');
             $table->integer('view_count')->nullable(false)->default(0);
         });
     }
@@ -27,7 +27,7 @@ class AddThumbnailAndViewCountToAdvertismentsTable extends Migration
     public function down()
     {
         Schema::table('advertisements', function (Blueprint $table) {
-            $table->dropColumn(['thumbnail','view_count']);
+            $table->dropColumn(['thumbnail', 'view_count']);
         });
     }
 }

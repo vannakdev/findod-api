@@ -15,13 +15,13 @@ class ChatParticipant extends Model
      */
     protected $fillable = [
         'chat_channel_id',
-        'user_id'
+        'user_id',
     ];
 
     protected $dates = [
         'created_at',
         'updated_at',
-        'deleted_at'
+        'deleted_at',
     ];
 
     // protected $hidden = [
@@ -30,22 +30,24 @@ class ChatParticipant extends Model
     // ];
 
     protected $appends = [
-        'user'
+        'user',
     ];
 
     public function getUserAttribute()
     {
         $user = new \App\Users();
+
         return \App\Users::where($user->getKeyName(), $this->user_id)
-                         ->select(['id', 'first_name', 'last_name', 'photo' , 'playerId'])
+                         ->select(['id', 'first_name', 'last_name', 'photo', 'playerId'])
                          ->first();
     }
 
     public function getDeletedAtAttribute($value)
     {
         if (is_null($value)) {
-            return "";
+            return '';
         }
+
         return $value;
     }
 

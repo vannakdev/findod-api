@@ -40,7 +40,6 @@ class ModifyForiegnKeyToFavoritesTable extends Migration
         Schema::table('favorites', function (Blueprint $table) {
             $table->dropForeign(['properties_id']);
             $table->dropForeign(['users_id']);
-
         });
     }
 }

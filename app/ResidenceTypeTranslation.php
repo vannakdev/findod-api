@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class ResidenceTypeTranslation extends Model
 {
-
     protected $table = 'residence_type_translations';
 
     /**
@@ -25,11 +24,10 @@ class ResidenceTypeTranslation extends Model
      *
      * @var array
      */
-    protected $hidden = ['id', 'locale', 'created_at', 'updated_at','residence_type_id'];
+    protected $hidden = ['id', 'locale', 'created_at', 'updated_at', 'residence_type_id'];
 
     public function ResidenceType()
     {
         return $this->belongsTo('App\ResidenceType', 'residence_type_id');
     }
-
 }

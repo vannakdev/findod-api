@@ -4,13 +4,10 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-
-
-class ProjectNameTranslation extends Model {
-
-    
+class ProjectNameTranslation extends Model
+{
     protected $table = 'project_name_translations';
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -19,7 +16,7 @@ class ProjectNameTranslation extends Model {
     protected $fillable = [
         'title',
         'locale',
-        'project_name_id'
+        'project_name_id',
     ];
 
     /**
@@ -27,9 +24,10 @@ class ProjectNameTranslation extends Model {
      *
      * @var array
      */
-    protected $hidden = ['id','locale', 'created_at', 'updated_at','project_name_id'];
+    protected $hidden = ['id', 'locale', 'created_at', 'updated_at', 'project_name_id'];
 
-    public function ProjectName() {
+    public function ProjectName()
+    {
         return $this->belongsTo('App\ProjectName');
     }
 }

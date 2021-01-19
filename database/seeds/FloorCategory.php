@@ -12,24 +12,24 @@ class FloorCategory extends Seeder
     public function run()
     {
         \App\FloorCategory::query()->delete();
-        $data=[
+        $data = [
             [
-                "id" =>1,
-                "project_name_count" =>1,
-                "rule"=> "G-11"
+                'id' =>1,
+                'project_name_count' =>1,
+                'rule'=> 'G-11',
             ],
             [
-                "id" =>2,
-                "project_name_count" =>1,
-                "rule"=> "12-23"
+                'id' =>2,
+                'project_name_count' =>1,
+                'rule'=> '12-23',
             ],
             [
-                "id" =>3,
-                "project_name_count" =>1,
-                "rule"=> "24-33"
-            ]
+                'id' =>3,
+                'project_name_count' =>1,
+                'rule'=> '24-33',
+            ],
         ];
-        foreach($data as $record){
+        foreach ($data as $record) {
             \App\FloorCategory::create($record);
         }
     }

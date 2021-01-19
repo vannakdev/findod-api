@@ -25,7 +25,7 @@ return [
             'http://dev-admin.odcambodia.com',
             'http://test-admin.odcambodia.com',
             'http://test.findod.com',
-            'http://dev.findod.com'
+            'http://dev.findod.com',
         ],
 
         'allow_methods' => [

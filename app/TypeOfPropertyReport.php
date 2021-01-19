@@ -4,8 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TypeOfPropertyReport extends Model {
-
+class TypeOfPropertyReport extends Model
+{
     /**
      * The attributes that are mass assignable.
      *
@@ -13,7 +13,7 @@ class TypeOfPropertyReport extends Model {
      */
     protected $table = 'type_of_property_reports';
     protected $fillable = [
-        'content'
+        'content',
     ];
 
     /**
@@ -25,12 +25,12 @@ class TypeOfPropertyReport extends Model {
         'title',
         'content',
         'created_at',
-        'updated_at'];
-    
-    protected $with=['translation'];
+        'updated_at', ];
 
-    public function translation() {
+    protected $with = ['translation'];
+
+    public function translation()
+    {
         return $this->hasMany('App\TypeOfPropertyReportTranslation', 'report_type_id')->where('locale', app('translator')->getLocale());
     }
-
 }

@@ -1,13 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateUsersTable extends Migration {
-
+class CreateUsersTable extends Migration
+{
     /**
-     * Schema table name to migrate
+     * Schema table name to migrate.
      * @var string
      */
     public $set_schema_table = 'users';
@@ -18,9 +18,11 @@ class CreateUsersTable extends Migration {
      *
      * @return void
      */
-    public function up() {
-        if (Schema::hasTable($this->set_schema_table))
+    public function up()
+    {
+        if (Schema::hasTable($this->set_schema_table)) {
             return;
+        }
         Schema::create($this->set_schema_table, function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -47,9 +49,9 @@ class CreateUsersTable extends Migration {
             $table->integer('favorite_counter')->nullable()->default('0');
             $table->text('setting');
 
-            $table->index(["userol_id"], 'fk_users_user_role_idx');
+            $table->index(['userol_id'], 'fk_users_user_role_idx');
 
-            $table->index(["provider_id"], 'FK_users_social');
+            $table->index(['provider_id'], 'FK_users_social');
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });
@@ -60,11 +62,11 @@ class CreateUsersTable extends Migration {
      *
      * @return void
      */
-    public function down() {
+    public function down()
+    {
         Schema::disableForeignKeyConstraints();
         Schema::dropIfExists($this->set_schema_table);
         Schema::enableForeignKeyConstraints();
         // Schema::dropIfExists($this->set_schema_table);
     }
-
 }

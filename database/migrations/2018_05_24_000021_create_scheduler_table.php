@@ -1,13 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateSchedulerTable extends Migration
 {
     /**
-     * Schema table name to migrate
+     * Schema table name to migrate.
      * @var string
      */
     public $set_schema_table = 'scheduler';
@@ -20,7 +20,9 @@ class CreateSchedulerTable extends Migration
      */
     public function up()
     {
-        if (Schema::hasTable($this->set_schema_table)) return;
+        if (Schema::hasTable($this->set_schema_table)) {
+            return;
+        }
         Schema::create($this->set_schema_table, function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -28,10 +30,9 @@ class CreateSchedulerTable extends Migration
             $table->date('process_at');
             $table->text('request');
 
-            $table->index(["notification_manager_id"], 'scheduler_notification_manager_id_foreign');
+            $table->index(['notification_manager_id'], 'scheduler_notification_manager_id_foreign');
             $table->softDeletes();
             $table->timestamps();
-
         });
     }
 
@@ -40,8 +41,8 @@ class CreateSchedulerTable extends Migration
      *
      * @return void
      */
-     public function down()
-     {
-       Schema::dropIfExists($this->set_schema_table);
-     }
+    public function down()
+    {
+        Schema::dropIfExists($this->set_schema_table);
+    }
 }

@@ -17,7 +17,7 @@ class ChatMessage extends Model
         'chat_channel_id',
         'user_id',
         'content',
-        'flag'
+        'flag',
     ];
 
     /**
@@ -28,24 +28,25 @@ class ChatMessage extends Model
     protected $dates = [
         'created_at',
         'updated_at',
-        'deleted_at'
+        'deleted_at',
     ];
 
     protected $hidden = [
         'user_id',
-        'chat_channel_id'
+        'chat_channel_id',
     ];
 
     public function user()
     {
-        return $this->belongsTo('App\Users')->select(['id', 'first_name', 'last_name', 'photo' , 'playerId']);
+        return $this->belongsTo('App\Users')->select(['id', 'first_name', 'last_name', 'photo', 'playerId']);
     }
 
     public function getDeletedAtAttribute($value)
     {
         if (is_null($value)) {
-            return "";
+            return '';
         }
+
         return $value;
     }
 }

@@ -1,16 +1,17 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateTypeOfPropertyReportsTable extends Migration
 {
-  /**
-     * Schema table name to migrate
+    /**
+     * Schema table name to migrate.
      * @var string
      */
     public $set_schema_table = 'type_of_property_reports';
+
     /**
      * Run the migrations.
      *
@@ -18,15 +19,16 @@ class CreateTypeOfPropertyReportsTable extends Migration
      */
     public function up()
     {
-        if (Schema::hasTable($this->set_schema_table)) return;
+        if (Schema::hasTable($this->set_schema_table)) {
+            return;
+        }
         Schema::create($this->set_schema_table, function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id')->unsigned();
-            $table->string('title',100)->nullable(FALSE)->default('');
-            $table->string('content')->nullable(FALSE)->default('');
+            $table->string('title', 100)->nullable(false)->default('');
+            $table->string('content')->nullable(false)->default('');
             $table->timestamps();
-            $table->unique(['content']);           
-
+            $table->unique(['content']);
         });
     }
 

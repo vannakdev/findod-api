@@ -27,12 +27,13 @@ class PostController extends Controller
                             ->first();
             }
         }
-        if ($request->hasHeader("x-localization")) {
-            $post->setDefaultLocale($request->header("x-localization"));
+        if ($request->hasHeader('x-localization')) {
+            $post->setDefaultLocale($request->header('x-localization'));
         }
-        if (!$post) {
-            return $this->getResponseData("0", "Record Not Found", "The post you are trying to search for is not availabe.");
+        if (! $post) {
+            return $this->getResponseData('0', 'Record Not Found', 'The post you are trying to search for is not availabe.');
         }
-        return $this->getResponseData('1', "Success", $post);
+
+        return $this->getResponseData('1', 'Success', $post);
     }
 }
